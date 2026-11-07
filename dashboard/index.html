@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Jarvis Lernzentrale</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  /* Eine Welt: nächtliches Labor-HUD. Cyan = System, Amber = Achtung/Ziel. Layout: drei Spalten, mobil gestapelt. */
+  --bg: #060b14;
+  --panel: rgba(12, 28, 46, 0.72);
+  --line: rgba(98, 214, 255, 0.22);
+  --cyan: #62d6ff;
+  --amber: #ffb547;
+  --text: #d8ecf7;
+  --muted: #7d97ab;
+  --good: #4de3a5;
+  --bad: #ff6b7a;
+  --display: "Chakra Petch", "Segoe UI", system-ui, sans-serif;
+  --body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; min-height: 100%; }
+body {
+  background:
+    radial-gradient(1200px 600px at 50% -10%, rgba(98,214,255,0.10), transparent 60%),
+    repeating-linear-gradient(0deg, rgba(98,214,255,0.035) 0 1px, transparent 1px 40px),
+    repeating-linear-gradient(90deg, rgba(98,214,255,0.035) 0 1px, transparent 1px 40px),
+    var(--bg);
+  color: var(--text);
+  font-family: var(--body);
+  font-size: 15px;
+  line-height: 1.5;
+}
+button, input, select { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+
+.wrap { max-width: 1280px; margin: 0 auto; padding: 20px 16px 40px; display: flex; flex-direction: column; gap: 18px; }
+
+header.top { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); padding-bottom: 14px; }
+.brand { font-family: var(--display); font-weight: 700; letter-spacing: 0.32em; font-size: 13px; color: var(--cyan); }
+.greet { font-family: var(--display); font-size: clamp(22px, 4vw, 34px); font-weight: 600; margin: 4px 0 0; text-wrap: balance; }
+.clock { font-family: var(--mono); text-align: right; }
+.clock .t { font-size: 28px; color: var(--cyan); font-variant-numeric: tabular-nums; }
+.clock .d { color: var(--muted); font-size: 13px; }
+
+.status { display: flex; flex-wrap: wrap; gap: 8px 18px; font-family: var(--mono); font-size: 12px; color: var(--muted); }
+.status b { color: var(--good); font-weight: 600; }
+.status .warn { color: var(--amber); }
+
+.grid { display: grid; grid-template-columns: 300px 1fr 320px; gap: 18px; align-items: start; }
+@media (max-width: 1040px) { .grid { grid-template-columns: 1fr 1fr; } .col-quiz { grid-column: 1 / -1; order: -1; } }
+@media (max-width: 680px) { .grid { grid-template-columns: 1fr; } }
+.col { display: flex; flex-direction: column; gap: 18px; min-width: 0; }
+
+.panel {
+  position: relative;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 16px;
+  backdrop-filter: blur(6px);
+  clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 14px 100%, 0 calc(100% - 14px));
+}
+.panel h2 { margin: 0 0 12px; font-family: var(--display); font-size: 13px; font-weight: 600; letter-spacing: 0.22em; text-transform: uppercase; color: var(--cyan); display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.panel h2 small { font-family: var(--mono); letter-spacing: 0; text-transform: none; color: var(--muted); font-size: 11px; }
+
+/* Reaktor */
+.core { display: grid; place-items: center; padding: 6px 0 2px; }
+.core-box { position: relative; width: 240px; max-width: 100%; aspect-ratio: 1; }
+.core-box canvas { width: 100%; height: 100%; display: block; }
+.core-read { position: absolute; inset: 0; display: grid; place-content: center; text-align: center; }
+.core-read .big { font-family: var(--display); font-size: 44px; font-weight: 700; line-height: 1; color: var(--text); font-variant-numeric: tabular-nums; }
+.core-read .lbl { font-family: var(--mono); font-size: 11px; color: var(--muted); letter-spacing: 0.08em; margin-top: 4px; }
+.core-note { font-size: 12px; color: var(--muted); text-align: center; margin: 6px 0 0; }
+
+.stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 12px; }
+.stat { border: 1px solid var(--line); padding: 8px; text-align: center; }
+.stat .v { font-family: var(--mono); font-size: 20px; color: var(--cyan); font-variant-numeric: tabular-nums; }
+.stat .k { font-size: 11px; color: var(--muted); }
+
+.bars { display: flex; flex-direction: column; gap: 9px; }
+.bar-row { display: grid; grid-template-columns: 96px 1fr 44px; gap: 8px; align-items: center; font-size: 13px; }
+.bar { height: 6px; background: rgba(98,214,255,0.10); position: relative; }
+.bar i { position: absolute; inset: 0 auto 0 0; background: linear-gradient(90deg, var(--cyan), var(--amber)); }
+.bar-row .p { font-family: var(--mono); font-size: 12px; color: var(--muted); text-align: right; font-variant-numeric: tabular-nums; }
+
+/* Quiz */
+.jarvis-line { font-family: var(--mono); font-size: 13px; color: var(--amber); min-height: 1.5em; margin: 0 0 12px; }
+.jarvis-line::before { content: "› "; color: var(--cyan); }
+.q-meta { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
+.chip { font-family: var(--mono); font-size: 11px; padding: 2px 8px; border: 1px solid var(--line); color: var(--muted); }
+.chip.topic { color: var(--cyan); border-color: rgba(98,214,255,0.5); }
+.chip.afb { color: var(--amber); border-color: rgba(255,181,71,0.5); }
+.q-text { font-family: var(--display); font-size: clamp(18px, 2.4vw, 23px); font-weight: 600; margin: 0 0 16px; text-wrap: balance; }
+.answers { display: grid; gap: 10px; }
+.ans {
+  text-align: left; padding: 12px 14px; background: rgba(98,214,255,0.05); border: 1px solid var(--line);
+  display: grid; grid-template-columns: 26px 1fr; gap: 10px; align-items: start; transition: background .15s, border-color .15s;
+}
+.ans:hover:not(:disabled) { background: rgba(98,214,255,0.12); border-color: var(--cyan); }
+.ans .key { font-family: var(--mono); color: var(--cyan); }
+.ans.right { border-color: var(--good); background: rgba(77,227,165,0.12); }
+.ans.wrong { border-color: var(--bad); background: rgba(255,107,122,0.12); }
+.ans:disabled { cursor: default; }
+.explain { margin-top: 14px; padding: 12px 14px; border-left: 3px solid var(--amber); background: rgba(255,181,71,0.07); font-size: 14px; }
+.explain[hidden] { display: none; }
+.row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 14px; }
+.btn { padding: 9px 16px; border: 1px solid var(--cyan); background: rgba(98,214,255,0.10); font-family: var(--display); font-weight: 600; letter-spacing: 0.08em; }
+.btn:hover { background: rgba(98,214,255,0.22); }
+.btn.ghost { border-color: var(--line); background: transparent; color: var(--muted); }
+.btn.amber { border-color: var(--amber); background: rgba(255,181,71,0.12); color: var(--amber); }
+.sel { padding: 8px 10px; background: var(--bg); border: 1px solid var(--line); }
+.toggle { display: inline-flex; gap: 6px; align-items: center; font-size: 13px; color: var(--muted); }
+
+/* Countdown */
+.exams { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.exam { display: grid; grid-template-columns: 58px 1fr auto; gap: 10px; align-items: center; padding: 8px 10px; border: 1px solid var(--line); border-left: 3px solid var(--cyan); }
+.exam.soon { border-left-color: var(--amber); }
+.exam.now { border-left-color: var(--bad); }
+.exam .days { font-family: var(--mono); font-size: 22px; text-align: center; line-height: 1; font-variant-numeric: tabular-nums; }
+.exam .days small { display: block; font-size: 10px; color: var(--muted); margin-top: 3px; }
+.exam .what { min-width: 0; }
+.exam .what b { display: block; font-weight: 600; }
+.exam .what .sub { display:block; font-size: 12px; color: var(--muted); overflow-wrap: anywhere; }
+.exam .x { background: none; border: 0; color: var(--muted); font-size: 18px; padding: 2px 6px; }
+.exam .x:hover { color: var(--bad); }
+.example-tag { font-family: var(--mono); font-size: 10px; color: var(--amber); border: 1px solid rgba(255,181,71,0.5); padding: 0 4px; margin-left: 4px; }
+form.add { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
+form.add input { padding: 8px 10px; background: var(--bg); border: 1px solid var(--line); min-width: 0; }
+form.add .full { grid-column: 1 / -1; }
+form.add label { display: flex; flex-direction: column; gap: 3px; font-size: 11px; color: var(--muted); }
+
+/* Timer */
+.timer { display: grid; place-items: center; gap: 10px; }
+.timer .tt { font-family: var(--mono); font-size: 46px; color: var(--cyan); font-variant-numeric: tabular-nums; line-height: 1; }
+.timer .phase { font-family: var(--display); letter-spacing: 0.2em; font-size: 12px; color: var(--amber); text-transform: uppercase; }
+.tbar { width: 100%; height: 4px; background: rgba(98,214,255,0.10); }
+.tbar i { display: block; height: 100%; width: 0; background: var(--cyan); transition: width 1s linear; }
+
+.term .word { font-family: var(--display); font-size: 20px; font-weight: 600; color: var(--amber); }
+.term p { margin: 6px 0 0; font-size: 14px; }
+
+footer { color: var(--muted); font-size: 12px; text-align: center; font-family: var(--mono); }
+
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div>
+      <div class="brand">J.A.R.V.I.S. · LERNZENTRALE</div>
+      <h1 class="greet" id="greet">Guten Tag, Sir.</h1>
+    </div>
+    <div class="clock"><div class="t" id="clock">--:--:--</div><div class="d" id="date"></div></div>
+  </header>
+
+  <div class="status" aria-label="Systemstatus">
+    <span>KERN: <b>ONLINE</b></span>
+    <span>MISSION: <b>FACHABI GESUNDHEIT &amp; SOZIALES</b></span>
+    <span>ZIELNOTE: <span class="warn">1,0</span></span>
+    <span id="status-exam">NÄCHSTE KLAUSUR: –</span>
+  </div>
+
+  <div class="grid">
+    <!-- Linke Spalte -->
+    <div class="col">
+      <section class="panel">
+        <h2>Leistungskern <small>Quiz-Trefferquote</small></h2>
+        <div class="core">
+          <div class="core-box">
+            <canvas id="core" width="480" height="480" aria-hidden="true"></canvas>
+            <div class="core-read"><div class="big" id="core-pct">0%</div><div class="lbl" id="core-np">– NOTENPUNKTE</div></div>
+          </div>
+        </div>
+        <p class="core-note">Schätzung aus dem Quiz, keine echte Zeugnisnote.</p>
+        <div class="stats">
+          <div class="stat"><div class="v" id="s-total">0</div><div class="k">Fragen</div></div>
+          <div class="stat"><div class="v" id="s-streak">0</div><div class="k">Serie</div></div>
+          <div class="stat"><div class="v" id="s-best">0</div><div class="k">Rekord</div></div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>Themenanalyse</h2>
+        <div class="bars" id="bars"></div>
+      </section>
+    </div>
+
+    <!-- Mitte: Quiz -->
+    <div class="col col-quiz">
+      <section class="panel" aria-live="polite">
+        <h2>Abfrage-Protokoll <small id="q-count"></small></h2>
+        <p class="jarvis-line" id="jline">Bereit, wenn Sie es sind, Sir.</p>
+        <div class="q-meta"><span class="chip topic" id="q-topic"></span><span class="chip afb" id="q-afb"></span></div>
+        <p class="q-text" id="q-text"></p>
+        <div class="answers" id="answers"></div>
+        <div class="explain" id="explain" hidden></div>
+        <div class="row">
+          <button class="btn" id="next" type="button">Nächste Frage ›</button>
+          <label for="filter" class="toggle">Thema
+            <select id="filter" class="sel">
+              <option value="alle">Alle</option>
+            </select>
+          </label>
+          <label class="toggle" for="voice"><input type="checkbox" id="voice"> Jarvis spricht</label>
+        </div>
+      </section>
+
+      <section class="panel term">
+        <h2>Fachbegriff des Tages <small>klausurfest formulieren</small></h2>
+        <div class="word" id="term-word"></div>
+        <p id="term-def"></p>
+      </section>
+    </div>
+
+    <!-- Rechte Spalte -->
+    <div class="col">
+      <section class="panel">
+        <h2>Klausur-Countdown <small>lokal gespeichert</small></h2>
+        <ul class="exams" id="exams"></ul>
+        <form class="add" id="add">
+          <label>Fach<input id="f-fach" required placeholder="z. B. Gesundheit"></label>
+          <label>Datum<input id="f-date" type="date" required></label>
+          <label class="full">Thema<input id="f-thema" placeholder="z. B. Prävention"></label>
+          <button class="btn full" type="submit">Klausur eintragen</button>
+        </form>
+      </section>
+
+      <section class="panel">
+        <h2>Fokus-Modus <small>25 / 5 Minuten</small></h2>
+        <div class="timer">
+          <div class="phase" id="t-phase">Lernblock</div>
+          <div class="tt" id="t-time">25:00</div>
+          <div class="tbar"><i id="t-bar"></i></div>
+          <div class="row" style="margin-top:4px">
+            <button class="btn amber" id="t-start" type="button">Start</button>
+            <button class="btn ghost" id="t-reset" type="button">Zurücksetzen</button>
+          </div>
+          <div class="core-note" id="t-done">Abgeschlossene Blöcke heute: 0</div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <footer>Jarvis · gebaut für das Fachabitur Gesundheit &amp; Soziales · Daten bleiben in diesem Browser</footer>
+</div>
+
+<script>
+(() => {
+"use strict";
+
+/* ---------- Speicher ---------- */
+const store = {
+  get(k, d) { try { const v = localStorage.getItem("jarvis." + k); return v ? JSON.parse(v) : d; } catch { return d; } },
+  set(k, v) { try { localStorage.setItem("jarvis." + k, JSON.stringify(v)); } catch {} }
+};
+
+/* ---------- Fragenbank ---------- */
+const Q = [
+  { t: "Gesundheit", a: "I", q: "Wer hat das Modell der Salutogenese entwickelt?", o: ["Aaron Antonovsky", "George L. Engel", "Hans Selye", "Abraham Maslow"], c: 0, e: "Antonovsky fragte nicht „Was macht krank?“, sondern „Was hält gesund?“ – Kernbegriff: Kohärenzgefühl (SOC)." },
+  { t: "Gesundheit", a: "I", q: "Welche drei Komponenten bilden das Kohärenzgefühl?", o: ["Verstehbarkeit, Handhabbarkeit, Bedeutsamkeit", "Motivation, Wissen, Können", "Körper, Geist, Umwelt", "Alarm, Widerstand, Erschöpfung"], c: 0, e: "Verstehbarkeit (kognitiv), Handhabbarkeit (Ressourcen), Bedeutsamkeit/Sinnhaftigkeit (motivational)." },
+  { t: "Gesundheit", a: "I", q: "Wie definiert die WHO-Verfassung (1946) Gesundheit?", o: ["Zustand vollständigen körperlichen, geistigen und sozialen Wohlbefindens", "Abwesenheit von Krankheit und Gebrechen", "Fähigkeit, arbeiten zu können", "Gleichgewicht von Risikofaktoren"], c: 0, e: "„… und nicht nur das Fehlen von Krankheit oder Gebrechen.“ Kritik: „vollständig“ ist kaum erreichbar, eher Ideal als Zustand." },
+  { t: "Gesundheit", a: "II", q: "Eine Mammografie-Untersuchung zur Brustkrebsfrüherkennung ist …", o: ["Sekundärprävention", "Primärprävention", "Tertiärprävention", "Verhältnisprävention"], c: 0, e: "Sekundärprävention = Früherkennung bereits bestehender, noch symptomloser Erkrankungen (Screening)." },
+  { t: "Gesundheit", a: "II", q: "Eine Reha nach einem Herzinfarkt zählt zur …", o: ["Tertiärprävention", "Primärprävention", "Sekundärprävention", "Gesundheitsförderung im Setting Schule"], c: 0, e: "Tertiärprävention: Folgeschäden und Rückfälle bei bereits Erkrankten verhindern." },
+  { t: "Gesundheit", a: "II", q: "Welche Maßnahme ist Verhältnisprävention?", o: ["Rauchverbot in Gaststätten", "Nichtraucherkurs bei der Krankenkasse", "Aufklärungsflyer über Zucker", "Persönlicher Trainingsplan"], c: 0, e: "Verhältnisprävention verändert Lebensbedingungen/Umwelt; Verhaltensprävention setzt beim Verhalten des Einzelnen an." },
+  { t: "Gesundheit", a: "I", q: "Welches Dokument von 1986 gilt als Grundlage der Gesundheitsförderung?", o: ["Ottawa-Charta", "Genfer Gelöbnis", "Alma-Ata-Erklärung", "Sozialgesetzbuch V"], c: 0, e: "Ottawa-Charta (WHO, 1986): Handlungsstrategien befähigen, vermitteln, vertreten (advocate)." },
+  { t: "Gesundheit", a: "I", q: "Wer formulierte 1977 das biopsychosoziale Modell?", o: ["George L. Engel", "Aaron Antonovsky", "Klaus Hurrelmann", "Richard Lazarus"], c: 0, e: "Engel: Krankheit entsteht im Zusammenspiel biologischer, psychischer und sozialer Faktoren – Gegenentwurf zum rein biomedizinischen Modell." },
+  { t: "Gesundheit", a: "II", q: "Was beschreibt die Inzidenz?", o: ["Anzahl der Neuerkrankungen in einem Zeitraum", "Anzahl aller Erkrankten zu einem Zeitpunkt", "Anteil der Todesfälle unter Erkrankten", "Durchschnittliche Krankheitsdauer"], c: 0, e: "Inzidenz = Neuerkrankungen. Prävalenz = alle Erkrankten (Bestand) zu einem Zeitpunkt oder in einem Zeitraum." },
+  { t: "Gesundheit", a: "I", q: "Welche ist KEINE Säule der gesetzlichen Sozialversicherung?", o: ["Haftpflichtversicherung", "Pflegeversicherung", "Unfallversicherung", "Arbeitslosenversicherung"], c: 0, e: "Die fünf Säulen: Kranken-, Renten-, Arbeitslosen-, Unfall- und Pflegeversicherung." },
+  { t: "Gesundheit", a: "II", q: "Im transaktionalen Stressmodell nach Lazarus bewertet man in der sekundären Bewertung …", o: ["die eigenen Bewältigungsressourcen", "ob die Situation irrelevant oder bedrohlich ist", "den Hormonspiegel", "die Reaktion der Mitmenschen"], c: 0, e: "Primär: Ist das relevant/bedrohlich? Sekundär: Kann ich das bewältigen? Danach Coping und Neubewertung." },
+  { t: "Gesundheit", a: "I", q: "Die Phasen des Allgemeinen Adaptationssyndroms nach Selye lauten …", o: ["Alarmreaktion, Widerstand, Erschöpfung", "Forming, Storming, Norming", "Wahrnehmen, Bewerten, Handeln", "Verstehen, Handhaben, Bewerten"], c: 0, e: "Selye beschreibt die körperliche Stressreaktion: Alarm → Widerstand (Anpassung) → Erschöpfung bei Dauerstress." },
+  { t: "Biologie", a: "I", q: "Wo wird Insulin gebildet?", o: ["In den Betazellen der Bauchspeicheldrüse", "In der Leber", "In der Nebennierenrinde", "In der Schilddrüse"], c: 0, e: "Langerhans-Inseln des Pankreas: Betazellen → Insulin (senkt Blutzucker), Alphazellen → Glukagon (hebt ihn)." },
+  { t: "Biologie", a: "II", q: "Was kennzeichnet Diabetes mellitus Typ 1?", o: ["Absoluter Insulinmangel durch Zerstörung der Betazellen", "Insulinresistenz vor allem durch Übergewicht", "Zu viel Glukagon", "Ein Mangel an Vitamin D"], c: 0, e: "Typ 1: Autoimmunerkrankung, Insulin muss zugeführt werden. Typ 2: Insulinresistenz, stark lebensstilabhängig." },
+  { t: "Biologie", a: "II", q: "Ab welchem BMI spricht die WHO von Adipositas?", o: ["30", "25", "27,5", "35"], c: 0, e: "BMI = Gewicht (kg) ÷ Größe (m)². 25–29,9 Übergewicht (Präadipositas), ab 30 Adipositas." },
+  { t: "Biologie", a: "I", q: "Wohin pumpt die rechte Herzkammer das Blut?", o: ["In die Lungenarterie (Lungenkreislauf)", "In die Aorta (Körperkreislauf)", "In den rechten Vorhof", "In die Hohlvene"], c: 0, e: "Rechts: sauerstoffarmes Blut → Lunge. Links: sauerstoffreiches Blut → Aorta → Körper." },
+  { t: "Biologie", a: "I", q: "Welche Zellen bilden Antikörper?", o: ["B-Lymphozyten (als Plasmazellen)", "Rote Blutkörperchen", "Blutplättchen", "Fresszellen (Makrophagen)"], c: 0, e: "B-Zellen differenzieren zu Plasmazellen und bilden Antikörper – Teil der spezifischen (erworbenen) Abwehr." },
+  { t: "Psychologie", a: "I", q: "Welche Krise steht im Jugendalter nach Erikson im Mittelpunkt?", o: ["Identität vs. Identitätsdiffusion", "Urvertrauen vs. Urmisstrauen", "Intimität vs. Isolation", "Werksinn vs. Minderwertigkeit"], c: 0, e: "Stufe 5 (Adoleszenz): Wer bin ich? Gelingt die Krise, entsteht eine stabile Identität." },
+  { t: "Psychologie", a: "I", q: "Welches Stadium nach Piaget gilt etwa von 7 bis 11 Jahren?", o: ["Konkret-operationales Stadium", "Sensomotorisches Stadium", "Präoperationales Stadium", "Formal-operationales Stadium"], c: 0, e: "Konkret-operational: logisches Denken an konkreten Dingen, Invarianz/Erhaltung wird verstanden." },
+  { t: "Psychologie", a: "II", q: "Ein Kind räumt auf, damit das Meckern der Eltern aufhört. Das ist …", o: ["Negative Verstärkung", "Positive Bestrafung", "Positive Verstärkung", "Löschung"], c: 0, e: "Negative Verstärkung = Wegfall eines unangenehmen Reizes → Verhalten wird häufiger. Nicht mit Bestrafung verwechseln!" },
+  { t: "Psychologie", a: "I", q: "Wer ist mit der klassischen Konditionierung verbunden?", o: ["Iwan Pawlow", "B. F. Skinner", "Albert Bandura", "Jean Piaget"], c: 0, e: "Pawlows Hund: neutraler Reiz (Glocke) wird durch Kopplung mit Futter zum konditionierten Reiz für Speichelfluss." },
+  { t: "Psychologie", a: "II", q: "Kinder schlagen eine Puppe, nachdem sie das bei Erwachsenen gesehen haben. Welche Theorie erklärt das?", o: ["Lernen am Modell (Bandura)", "Operante Konditionierung (Skinner)", "Bindungstheorie (Bowlby)", "Stufenmodell (Erikson)"], c: 0, e: "Bobo-Doll-Experiment: Aneignungs- und Ausführungsphase; ob gezeigt wird, hängt von Konsequenzen ab (stellvertretende Verstärkung)." },
+  { t: "Psychologie", a: "I", q: "Die unterste Stufe der Bedürfnispyramide nach Maslow umfasst …", o: ["Physiologische Bedürfnisse", "Sicherheitsbedürfnisse", "Soziale Bedürfnisse", "Selbstverwirklichung"], c: 0, e: "Von unten: physiologisch → Sicherheit → sozial → Anerkennung/Wertschätzung → Selbstverwirklichung." },
+  { t: "Psychologie", a: "I", q: "Mit welchem Verfahren untersuchte Mary Ainsworth Bindungstypen?", o: ["Fremde Situation", "Bobo-Doll-Experiment", "Marshmallow-Test", "Stanford-Prison-Experiment"], c: 0, e: "Fremde Situation: Trennung und Wiedervereinigung mit der Bezugsperson → sicher, unsicher-vermeidend, unsicher-ambivalent (später: desorganisiert)." },
+  { t: "Pädagogik", a: "I", q: "Welcher Satz stammt aus Watzlawicks Axiomen?", o: ["Man kann nicht nicht kommunizieren.", "Jede Nachricht hat vier Seiten.", "Der Mensch ist, was er isst.", "Lernen ist Verhaltensänderung."], c: 0, e: "Erstes Axiom: Auch Schweigen oder Wegschauen ist Kommunikation." },
+  { t: "Pädagogik", a: "I", q: "Welche vier Seiten hat eine Nachricht nach Schulz von Thun?", o: ["Sachinhalt, Selbstoffenbarung, Beziehung, Appell", "Sender, Empfänger, Kanal, Code", "Inhalt, Form, Ziel, Wirkung", "Ich, Du, Wir, Es"], c: 0, e: "Kommunikationsquadrat / Vier-Ohren-Modell – sehr klausurbeliebt mit Fallbeispiel!" },
+  { t: "Pädagogik", a: "I", q: "Welche Erziehungsstile unterschied Kurt Lewin?", o: ["Autoritär, demokratisch, laissez-faire", "Autoritativ, permissiv, vernachlässigend", "Streng, liebevoll, gleichgültig", "Lenkend, fördernd, fordernd"], c: 0, e: "Lewin (1939). Baumrind ergänzt später: autoritativ, autoritär, permissiv (und vernachlässigend)." },
+  { t: "Pädagogik", a: "I", q: "Wie heißen die ersten vier Gruppenphasen nach Tuckman?", o: ["Forming, Storming, Norming, Performing", "Planning, Doing, Checking, Acting", "Orientierung, Konflikt, Lösung, Abschied", "Anfang, Mitte, Ende, Rückblick"], c: 0, e: "Später ergänzt: Adjourning (Auflösung)." },
+  { t: "Pädagogik", a: "II", q: "Sozialisation als „produktive Verarbeitung der inneren und äußeren Realität“ beschreibt …", o: ["Klaus Hurrelmann", "Sigmund Freud", "Kurt Lewin", "Carl Rogers"], c: 0, e: "Hurrelmann: Der Mensch ist aktiv, gestaltet seine Entwicklung mit – Wechselspiel von Anlage und Umwelt." },
+  { t: "Methoden", a: "II", q: "Was verlangt der Operator „erläutern“?", o: ["Sachverhalt nachvollziehbar darstellen und mit Beispielen veranschaulichen", "Begriffe ohne Erklärung aufzählen", "Ein eigenes, begründetes Urteil fällen", "Nur eine Definition wiedergeben"], c: 0, e: "„Erläutern“ = AFB II. Ohne Beispiel/Fallbezug gibt es Punktabzug. „Beurteilen“ wäre AFB III." },
+  { t: "Methoden", a: "III", q: "Welcher Operator gehört zum Anforderungsbereich III?", o: ["Beurteilen", "Nennen", "Beschreiben", "Erklären"], c: 0, e: "AFB III: beurteilen, bewerten, erörtern, Stellung nehmen – immer mit Kriterien, Pro/Contra und Fazit." }
+];
+
+const TERMS = [
+  ["Ressourcen", "Innere (z. B. Selbstwirksamkeit, Wissen) und äußere (z. B. soziale Unterstützung, Geld) Kräfte, die helfen, Belastungen zu bewältigen und Gesundheit zu erhalten."],
+  ["Setting-Ansatz", "Gesundheitsförderung in Lebenswelten wie Schule, Betrieb oder Kita, indem dort Strukturen und Verhalten gemeinsam verändert werden."],
+  ["Empowerment", "Befähigung von Menschen, ihre Lebensumstände und Gesundheit selbstbestimmt zu gestalten – zentrales Prinzip der Ottawa-Charta."],
+  ["Coping", "Alle Bemühungen, mit Stress umzugehen: problemorientiert (Ursache angehen) oder emotionsorientiert (Gefühle regulieren)."],
+  ["Resilienz", "Psychische Widerstandsfähigkeit: trotz Belastungen und Krisen gesund zu bleiben bzw. sich zu erholen."],
+  ["Selbstwirksamkeit", "Überzeugung, schwierige Situationen aus eigener Kraft bewältigen zu können (Bandura)."],
+  ["Komorbidität", "Gleichzeitiges Auftreten mehrerer Erkrankungen bei einer Person, z. B. Adipositas und Diabetes Typ 2."],
+  ["Partizipation", "Beteiligung der Betroffenen an Entscheidungen und Maßnahmen – erhöht Akzeptanz und Wirksamkeit."],
+  ["Kongruenz", "Echtheit nach Rogers: Inneres Erleben und äußeres Verhalten stimmen überein – eine der drei Grundhaltungen."],
+  ["Inklusion", "Alle Menschen nehmen von Anfang an gleichberechtigt teil; nicht der Mensch passt sich an, sondern das System."]
+];
+
+/* ---------- Zustand ---------- */
+const st = store.get("stats", { total: 0, right: 0, streak: 0, best: 0, topics: {} });
+let current = null, answered = false;
+
+/* ---------- Jarvis-Stimme ---------- */
+const lines = {
+  right: ["Korrekt, Sir. Ich bin beinahe beeindruckt.", "Richtig. Notieren Sie sich das Gefühl, es steht Ihnen.", "Volltreffer. Die 1,0 rückt näher.", "Präzise. So hätte ich es auch formuliert.", "Richtig. Ich streiche meine vorbereitete Belehrung."],
+  wrong: ["Knapp daneben ist auch vorbei, Sir.", "Interessante Theorie. Leider falsch.", "Das war nichts. Lesen Sie die Erklärung – ich warte.", "Falsch, aber mutig. Mut gibt nur keine Notenpunkte.", "Nein. Aber genau dafür üben wir ja."],
+  streak: ["Fünf in Folge. Soll ich die Lehrerin vorwarnen?", "Zehn richtige am Stück. Ich muss meine Erwartungen nach oben korrigieren."]
+};
+const pick = a => a[Math.floor(Math.random() * a.length)];
+function say(text) {
+  document.getElementById("jline").textContent = text;
+  if (!document.getElementById("voice").checked || !("speechSynthesis" in window)) return;
+  try {
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = "de-DE"; u.rate = 1.02; u.pitch = 0.9;
+    const v = speechSynthesis.getVoices().find(v => v.lang && v.lang.startsWith("de"));
+    if (v) u.voice = v;
+    speechSynthesis.speak(u);
+  } catch {}
+}
+
+/* ---------- Quiz ---------- */
+const topics = [...new Set(Q.map(q => q.t))];
+const filterEl = document.getElementById("filter");
+topics.forEach(t => { const o = document.createElement("option"); o.value = t; o.textContent = t; filterEl.appendChild(o); });
+
+function shuffle(a) { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+
+function nextQuestion() {
+  const pool = Q.filter(q => filterEl.value === "alle" || q.t === filterEl.value);
+  let q; do { q = pick(pool); } while (pool.length > 1 && q === current);
+  current = q; answered = false;
+  document.getElementById("q-topic").textContent = q.t;
+  document.getElementById("q-afb").textContent = "AFB " + q.a;
+  document.getElementById("q-text").textContent = q.q;
+  document.getElementById("q-count").textContent = pool.length + " Fragen im Pool";
+  const ex = document.getElementById("explain"); ex.hidden = true; ex.textContent = "";
+  const box = document.getElementById("answers"); box.innerHTML = "";
+  shuffle(q.o.map((text, i) => ({ text, ok: i === q.c }))).forEach((opt, i) => {
+    const b = document.createElement("button");
+    b.type = "button"; b.className = "ans"; b.dataset.ok = opt.ok ? "1" : "0";
+    b.innerHTML = `<span class="key">${"ABCD"[i]}</span><span></span>`;
+    b.lastChild.textContent = opt.text;
+    b.addEventListener("click", () => answer(b));
+    box.appendChild(b);
+  });
+}
+
+function answer(btn) {
+  if (answered) return; answered = true;
+  const ok = btn.dataset.ok === "1";
+  document.querySelectorAll(".ans").forEach(b => { b.disabled = true; if (b.dataset.ok === "1") b.classList.add("right"); });
+  if (!ok) btn.classList.add("wrong");
+  const tp = st.topics[current.t] || (st.topics[current.t] = { total: 0, right: 0 });
+  st.total++; tp.total++;
+  if (ok) { st.right++; tp.right++; st.streak++; st.best = Math.max(st.best, st.streak); } else st.streak = 0;
+  store.set("stats", st);
+  const ex = document.getElementById("explain"); ex.textContent = current.e; ex.hidden = false;
+  say(ok ? (st.streak === 5 ? lines.streak[0] : st.streak === 10 ? lines.streak[1] : pick(lines.right)) : pick(lines.wrong));
+  render();
+}
+
+/* ---------- Auswertung ---------- */
+function points(pct) {
+  const t = [[95,15],[90,14],[85,13],[80,12],[75,11],[70,10],[65,9],[60,8],[55,7],[50,6],[45,5],[40,4],[33,3],[27,2],[20,1]];
+  for (const [p, n] of t) if (pct >= p) return n; return 0;
+}
+function render() {
+  const pct = st.total ? Math.round(st.right / st.total * 100) : 0;
+  document.getElementById("core-pct").textContent = pct + "%";
+  document.getElementById("core-np").textContent = st.total ? points(pct) + " NOTENPUNKTE (≈)" : "– NOTENPUNKTE";
+  document.getElementById("s-total").textContent = st.total;
+  document.getElementById("s-streak").textContent = st.streak;
+  document.getElementById("s-best").textContent = st.best;
+  const bars = document.getElementById("bars"); bars.innerHTML = "";
+  topics.forEach(t => {
+    const d = st.topics[t] || { total: 0, right: 0 };
+    const p = d.total ? Math.round(d.right / d.total * 100) : 0;
+    const row = document.createElement("div"); row.className = "bar-row";
+    row.innerHTML = `<span></span><div class="bar"><i style="width:${p}%"></i></div><span class="p">${d.total ? p + "%" : "–"}</span>`;
+    row.firstChild.textContent = t;
+    bars.appendChild(row);
+  });
+  targetPct = pct / 100;
+}
+
+/* ---------- Reaktor-Animation ---------- */
+const cv = document.getElementById("core"), cx = cv.getContext("2d");
+const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
+let targetPct = 0, shownPct = 0, rot = 0;
+function draw() {
+  const W = cv.width, c = W / 2;
+  cx.clearRect(0, 0, W, W);
+  shownPct += (targetPct - shownPct) * 0.06;
+  // Ticks
+  cx.save(); cx.translate(c, c); cx.rotate(rot * 0.2);
+  for (let i = 0; i < 72; i++) {
+    cx.rotate(Math.PI * 2 / 72);
+    cx.strokeStyle = i % 6 === 0 ? "rgba(98,214,255,0.7)" : "rgba(98,214,255,0.25)";
+    cx.lineWidth = 2; cx.beginPath(); cx.moveTo(0, -226); cx.lineTo(0, i % 6 === 0 ? -208 : -216); cx.stroke();
+  }
+  cx.restore();
+  // Rotierende Segmente
+  const seg = (r, w, n, speed, color, gap) => {
+    cx.save(); cx.translate(c, c); cx.rotate(rot * speed);
+    cx.strokeStyle = color; cx.lineWidth = w;
+    for (let i = 0; i < n; i++) { const a = i * Math.PI * 2 / n; cx.beginPath(); cx.arc(0, 0, r, a, a + Math.PI * 2 / n - gap); cx.stroke(); }
+    cx.restore();
+  };
+  seg(196, 3, 3, 0.6, "rgba(98,214,255,0.55)", 0.5);
+  seg(120, 2, 8, -0.9, "rgba(98,214,255,0.35)", 0.25);
+  seg(100, 6, 12, 0.4, "rgba(255,181,71,0.25)", 0.18);
+  // Fortschrittsring
+  cx.lineCap = "round";
+  cx.strokeStyle = "rgba(98,214,255,0.12)"; cx.lineWidth = 14;
+  cx.beginPath(); cx.arc(c, c, 162, 0, Math.PI * 2); cx.stroke();
+  const g = cx.createLinearGradient(0, 0, W, W); g.addColorStop(0, "#62d6ff"); g.addColorStop(1, "#ffb547");
+  cx.strokeStyle = g; cx.lineWidth = 14; cx.shadowColor = "#62d6ff"; cx.shadowBlur = 18;
+  cx.beginPath(); cx.arc(c, c, 162, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * Math.max(shownPct, 0.002)); cx.stroke();
+  cx.shadowBlur = 0; cx.lineCap = "butt";
+  // Kernglühen
+  const rg = cx.createRadialGradient(c, c, 0, c, c, 90); rg.addColorStop(0, "rgba(98,214,255,0.22)"); rg.addColorStop(1, "rgba(98,214,255,0)");
+  cx.fillStyle = rg; cx.beginPath(); cx.arc(c, c, 90, 0, Math.PI * 2); cx.fill();
+  if (!still) rot += 0.012;
+  requestAnimationFrame(draw);
+}
+
+/* ---------- Klausuren ---------- */
+function iso(offset) { const d = new Date(); d.setDate(d.getDate() + offset); return d.toISOString().slice(0, 10); }
+let exams = store.get("exams", null);
+if (!exams) exams = [
+  { fach: "Gesundheit", thema: "Prävention & Salutogenese", date: iso(9), ex: true },
+  { fach: "Psychologie", thema: "Lerntheorien", date: iso(23), ex: true }
+];
+function daysUntil(s) { const t = new Date(s + "T00:00:00"), n = new Date(); n.setHours(0,0,0,0); return Math.round((t - n) / 864e5); }
+function renderExams() {
+  exams = exams.filter(e => daysUntil(e.date) >= 0).sort((a, b) => a.date.localeCompare(b.date));
+  store.set("exams", exams);
+  const ul = document.getElementById("exams"); ul.innerHTML = "";
+  if (!exams.length) { ul.innerHTML = '<li class="core-note">Keine Klausuren eingetragen. Verdächtig ruhig, Sir.</li>'; }
+  exams.forEach((e, i) => {
+    const d = daysUntil(e.date);
+    const li = document.createElement("li");
+    li.className = "exam" + (d <= 3 ? " now" : d <= 10 ? " soon" : "");
+    li.innerHTML = `<div class="days">${d}<small>${d === 1 ? "TAG" : "TAGE"}</small></div><div class="what"><b></b><span class="sub"></span></div><button class="x" type="button" aria-label="Klausur entfernen">×</button>`;
+    li.querySelector("b").textContent = e.fach;
+    if (e.ex) { const tag = document.createElement("span"); tag.className = "example-tag"; tag.textContent = "BEISPIEL"; li.querySelector("b").appendChild(tag); }
+    li.querySelector(".sub").textContent = (e.thema ? e.thema + " · " : "") + new Date(e.date + "T00:00:00").toLocaleDateString("de-DE", { weekday: "short", day: "2-digit", month: "2-digit" });
+    li.querySelector(".x").addEventListener("click", () => { exams.splice(i, 1); renderExams(); });
+    ul.appendChild(li);
+  });
+  const s = document.getElementById("status-exam");
+  if (exams.length) { const d = daysUntil(exams[0].date); s.innerHTML = `NÄCHSTE KLAUSUR: <span class="warn"></span>`; s.firstElementChild.textContent = `${exams[0].fach.toUpperCase()} IN ${d} ${d === 1 ? "TAG" : "TAGEN"}`; }
+  else s.textContent = "NÄCHSTE KLAUSUR: –";
+}
+document.getElementById("add").addEventListener("submit", ev => {
+  ev.preventDefault();
+  const fach = document.getElementById("f-fach").value.trim(), date = document.getElementById("f-date").value, thema = document.getElementById("f-thema").value.trim();
+  if (!fach || !date) return;
+  if (daysUntil(date) < 0) { say("Diese Klausur liegt in der Vergangenheit, Sir. Selbst ich kann die Zeit nicht zurückdrehen."); return; }
+  exams = exams.filter(e => !e.ex);
+  exams.push({ fach, thema, date });
+  ev.target.reset(); renderExams();
+  const d = daysUntil(date);
+  say(d <= 3 ? `Eingetragen. ${d} Tage? Dann sollten wir sofort anfangen, Sir.` : `Eingetragen. ${d} Tage bis ${fach}. Genug Zeit – wenn wir sie nutzen.`);
+});
+
+/* ---------- Fokus-Timer ---------- */
+let tLeft = 25 * 60, tTotal = 25 * 60, tRun = null, tPhase = "work";
+let tDone = store.get("done", { day: "", n: 0 }); if (tDone.day !== iso(0)) tDone = { day: iso(0), n: 0 };
+const fmt = s => String(Math.floor(s / 60)).padStart(2, "0") + ":" + String(s % 60).padStart(2, "0");
+function tRender() {
+  document.getElementById("t-time").textContent = fmt(tLeft);
+  document.getElementById("t-phase").textContent = tPhase === "work" ? "Lernblock" : "Pause";
+  document.getElementById("t-bar").style.width = (100 - tLeft / tTotal * 100) + "%";
+  document.getElementById("t-start").textContent = tRun ? "Pause" : "Start";
+  document.getElementById("t-done").textContent = "Abgeschlossene Blöcke heute: " + tDone.n;
+}
+function tTick() {
+  tLeft--;
+  if (tLeft <= 0) {
+    if (tPhase === "work") { tDone.n++; store.set("done", tDone); tPhase = "break"; tTotal = tLeft = 5 * 60; say("Lernblock abgeschlossen. Fünf Minuten Pause, Sir. Handy zählt nicht als Erholung."); }
+    else { tPhase = "work"; tTotal = tLeft = 25 * 60; say("Pause vorbei. Zurück an die Arbeit."); }
+  }
+  tRender();
+}
+document.getElementById("t-start").addEventListener("click", () => {
+  if (tRun) { clearInterval(tRun); tRun = null; say("Timer pausiert."); }
+  else { tRun = setInterval(tTick, 1000); say(tPhase === "work" ? "Fokus-Modus aktiviert. Ablenkungen werden ignoriert." : "Pause läuft."); }
+  tRender();
+});
+document.getElementById("t-reset").addEventListener("click", () => { clearInterval(tRun); tRun = null; tPhase = "work"; tTotal = tLeft = 25 * 60; tRender(); });
+
+/* ---------- Uhr & Begrüßung ---------- */
+function clock() {
+  const n = new Date();
+  document.getElementById("clock").textContent = n.toLocaleTimeString("de-DE");
+  document.getElementById("date").textContent = n.toLocaleDateString("de-DE", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+}
+const h = new Date().getHours();
+document.getElementById("greet").textContent =
+  h < 5 ? "Es ist mitten in der Nacht, Sir. Ich bewundere den Einsatz." :
+  h < 11 ? "Guten Morgen, Sir. Alle Systeme bereit." :
+  h < 17 ? "Guten Tag, Sir. Zeit, ein paar Notenpunkte zu sammeln." :
+  h < 22 ? "Guten Abend, Sir. Eine Runde geht noch." :
+           "Späte Schicht, Sir. Danach wird geschlafen.";
+const day = Math.floor(Date.now() / 864e5);
+const term = TERMS[day % TERMS.length];
+document.getElementById("term-word").textContent = term[0];
+document.getElementById("term-def").textContent = term[1];
+
+/* ---------- Start ---------- */
+document.getElementById("next").addEventListener("click", nextQuestion);
+filterEl.addEventListener("change", nextQuestion);
+document.getElementById("voice").addEventListener("change", e => { if (e.target.checked) say("Sprachausgabe aktiviert. Ich hoffe, Sie mögen meine Stimme."); });
+clock(); setInterval(clock, 1000);
+render(); renderExams(); tRender(); nextQuestion(); draw();
+})();
+</script>
+</body>
+</html>
