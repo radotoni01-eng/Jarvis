@@ -573,6 +573,8 @@ nav.tabs .ico { display: none; }
 @keyframes micpulse2 { 50% { box-shadow: 0 0 0 14px rgba(var(--v),.12), 0 0 40px rgba(var(--v),.45); } }
 .vm-dict { width: min(720px, 100%); }
 .vm-dict textarea { width: 100%; min-height: 76px; background: rgba(4,9,15,.85); border: 1px solid var(--cyan); padding: 12px; font-size: 18px; resize: none; box-shadow: 0 0 30px rgba(var(--p),.15); }
+.vm-voice { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; align-items: center; max-width: 92vw; }
+.vm-voice .sel { max-width: 230px; } .vm-voice .seg button[aria-pressed="true"] { background: rgba(var(--p),.18); color: var(--cyan); border-color: var(--cyan); }
 .vm-opts { display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; font-size: 12px; color: var(--muted); }
 #vm .toggle input, #set .toggle input { accent-color: var(--cyan); width: 18px; height: 18px; }
 
@@ -701,7 +703,7 @@ header.top::after { left: 0; animation: sweep 5s linear infinite; will-change: t
 @keyframes scanv { to { transform: translate3d(0, 233%, 0); } }
 @keyframes flame { to { text-shadow: 0 0 14px var(--amber); } }
 @media (pointer: coarse) { .scanlines { display: none; } }
-#vm, #breath { -webkit-backdrop-filter: none !important; backdrop-filter: none !important; background-color: rgba(3,8,13,.9); }
+#vm, #breath { -webkit-backdrop-filter: none !important; backdrop-filter: none !important; background-color: rgba(3,8,13,.975); }
 #pal { background: rgba(2,6,10,.86); }
 body.hid *, body.hid *::before, body.hid *::after { animation-play-state: paused !important; }
 </style>
@@ -744,6 +746,11 @@ body.hid *, body.hid *::before, body.hid *::after { animation-play-state: paused
     <div class="note center">Jarvis sendet automatisch, sobald Sie kurz Pause machen.</div>
   </div>
   <button class="vm-mic" id="vm-mic" type="button" aria-label="Sprechen">🎙</button>
+  <div class="vm-voice">
+    <div class="seg" id="vm-preset" role="group" aria-label="Stimmprofil"><button type="button" data-p="jarvis">Jarvis ♂</button><button type="button" data-p="friday">Freitag ♀</button><button type="button" data-p="custom">Eigene</button></div>
+    <select class="sel" id="vm-voice" aria-label="Stimme wählen"></select>
+    <button class="tbtn" id="vm-test" type="button">▶ Probe</button>
+  </div>
   <div class="vm-opts">
     <label class="toggle" for="vm-hands"><input type="checkbox" id="vm-hands" checked> Freihändig weiter zuhören</label>
     <label class="toggle" for="vm-agent"><input type="checkbox" id="vm-agent"> Agent-Werkzeuge</label>
@@ -1254,7 +1261,7 @@ const hhmm = d => d.toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-di
 /* ================= ZUSTAND ================= */
 const DEF = { stats: { total: 0, right: 0, streak: 0, best: 0, topics: {} }, own: [], cards: {}, deck: [], err: {}, xp: 0, ach: {}, focus: { day: "", n: 0, total: 0 }, blitzBest: 0, cardsDone: 0,
   act: {}, grades: [], gw: 50, gtarget: "1,5", todos: [], sound: false, voice: false, theme: "arc", agent: true, tier: "default", style: "jarvis",
-  mem: [], voc: {}, vocDeck: [], vocDir: "de", vocDone: 0, blurts: [], sims: [], day: {}, voiceName: "", rate: 1.03, pitch: .9, perf: false, swipe: true };
+  mem: [], voc: {}, vocDeck: [], vocDir: "de", vocDone: 0, blurts: [], sims: [], day: {}, voiceName: "", vpreset: "jarvis", rate: 1.03, pitch: .9, perf: false, swipe: true };
 let S;
 try { S = Object.assign(structuredClone(DEF), JSON.parse(localStorage.getItem("jarvis3.state") || "{}")); } catch { S = structuredClone(DEF); }
 let cloudRef = null, saveT = null, lastSaved = "";
@@ -2261,12 +2268,17 @@ function stripSugg(m) {
 }
 
 /* ---------- Sprach-Engine (iOS-fest: Sätze in Warteschlange, Watchdog) ---------- */
+const VPRESET = { jarvis: { pref: ["Markus", "Yannick", "Viktor", "Martin", "Reed", "Eddy", "Grandpa", "Stefan", "Conrad", "Killian", "Male", "Google Deutsch"], rate: 1.02, pitch: .86 },
+  friday: { pref: ["Anna", "Helena", "Petra", "Sandy", "Shelley", "Katja", "Amala", "Female", "Google Deutsch"], rate: 1.06, pitch: 1.04 } };
 function fillVoiceSelect() {
-  const s = $("set-voice"); if (!s) return; let vs = [];
+  let vs = [];
   try { vs = (window.speechSynthesis && speechSynthesis.getVoices() || []).filter(v => v.lang && v.lang.toLowerCase().startsWith("de")); } catch {}
-  s.innerHTML = ""; s.appendChild(Object.assign(el("option", null, "Automatisch"), { value: "" }));
-  vs.forEach(v => s.appendChild(Object.assign(el("option", null, v.name + (v.localService === false ? " · online" : "")), { value: v.name })));
-  s.value = S.voiceName || "";
+  const q = v => /premium|enhanced|erweitert|neural|natural/i.test(v.name) ? 0 : 1; vs.sort((a, b) => q(a) - q(b) || a.name.localeCompare(b.name));
+  ["set-voice", "vm-voice"].forEach(id => { const s = $(id); if (!s) return;
+    s.innerHTML = ""; s.appendChild(Object.assign(el("option", null, S.vpreset === "friday" ? "Automatisch (Freitag)" : "Automatisch (Jarvis)"), { value: "" }));
+    vs.forEach(v => s.appendChild(Object.assign(el("option", null, v.name + (v.localService === false ? " · online" : "")), { value: v.name })));
+    s.value = S.voiceName || ""; });
+  document.querySelectorAll("#vm-preset button").forEach(b => b.setAttribute("aria-pressed", b.dataset.p === (S.voiceName ? "custom" : S.vpreset || "jarvis") ? "true" : "false"));
 }
 const TTS = (() => {
   const synth = window.speechSynthesis || null; let voices = [], q = 0, gen = 0, onIdle = null, estEnd = 0;
@@ -2275,7 +2287,9 @@ const TTS = (() => {
   function pickVoice(lang) {
     const L = voices.filter(v => v.lang && v.lang.toLowerCase().startsWith(lang));
     if (lang === "de" && S.voiceName) { const v = voices.find(v => v.name === S.voiceName); if (v) return v; }
-    const pref = lang === "de" ? ["Anna", "Helena", "Markus", "Yannick", "Petra", "Viktor", "Google Deutsch"] : ["Daniel", "Arthur", "Serena", "Kate", "Google UK English Male"];
+    const pref = lang === "de" ? (VPRESET[S.vpreset] || VPRESET.jarvis).pref : S.vpreset === "friday" ? ["Kate", "Serena", "Stephanie", "Martha", "Google UK English Female"] : ["Daniel", "Arthur", "Oliver", "Google UK English Male"];
+    const hq = /premium|enhanced|erweitert|neural|natural/i;
+    for (const p of pref) { const v = L.find(v => v.name.indexOf(p) >= 0 && hq.test(v.name)); if (v) return v; }
     for (const p of pref) { const v = L.find(v => v.name.indexOf(p) >= 0); if (v) return v; }
     return L[0] || null;
   }
@@ -2855,7 +2869,15 @@ function applyPerf() { document.body.classList.toggle("perf", !!S.perf); if (S.p
 function setOpen() { $("set").hidden = false; fillVoiceSelect(); $("set-rate").value = S.rate; $("set-pitch").value = S.pitch; $("set-rate-v").textContent = Number(S.rate).toFixed(2) + "×"; $("set-pitch-v").textContent = Number(S.pitch).toFixed(2); $("set-perf").checked = !!S.perf; $("set-swipe").checked = S.swipe !== false; $("set-restore").hidden = true; $("set-reset-c").hidden = true; }
 function setClose() { $("set").hidden = true; }
 $("b-set").addEventListener("click", setOpen); $("set-close").addEventListener("click", setClose);
-$("set-voice").addEventListener("change", () => { S.voiceName = $("set-voice").value; save(); });
+function setVoice(name) { S.voiceName = name; save(); fillVoiceSelect(); }
+$("set-voice").addEventListener("change", () => setVoice($("set-voice").value));
+$("vm-voice").addEventListener("change", () => { setVoice($("vm-voice").value); voiceProbe(); });
+document.querySelectorAll("#vm-preset button").forEach(b => b.addEventListener("click", () => {
+  const p = b.dataset.p; if (p === "custom") { $("vm-voice").focus(); try { $("vm-voice").showPicker(); } catch {} return; }
+  S.vpreset = p; S.voiceName = ""; S.rate = VPRESET[p].rate; S.pitch = VPRESET[p].pitch; save(); fillVoiceSelect(); voiceProbe();
+}));
+function voiceProbe() { TTS.stop(); TTS.say(S.vpreset === "friday" && !S.voiceName ? "Freitag hier. Ich übernehme, solange Jarvis Pause macht, Sir." : "Zu Diensten, Sir. So klinge ich ab jetzt. Gefällt es Ihnen, oder soll ich mich noch einmal umziehen?"); }
+$("vm-test").addEventListener("click", voiceProbe);
 $("set-rate").addEventListener("input", () => { S.rate = Number($("set-rate").value); $("set-rate-v").textContent = S.rate.toFixed(2) + "×"; save(); });
 $("set-pitch").addEventListener("input", () => { S.pitch = Number($("set-pitch").value); $("set-pitch-v").textContent = S.pitch.toFixed(2); save(); });
 $("set-test").addEventListener("click", () => { TTS.stop(); TTS.unlock(); TTS.say("Guten Tag, Sir. So klinge ich mit diesen Einstellungen. Die Deutschklausur wartet bereits."); });
