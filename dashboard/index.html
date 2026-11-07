@@ -9,9 +9,9 @@
 <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 <style>
 :root {
-  /* Eine Welt: nächtliches Labor-HUD. Cyan = System, Amber = Achtung/Ziel. Layout: drei Spalten, mobil gestapelt. */
-  --bg: #060b14;
-  --panel: rgba(12, 28, 46, 0.72);
+  /* Eine Welt: nächtliches Labor-HUD. Cyan = System, Amber = Achtung/Ziel. Layout: Kopfzeile, Klausurmodus-Band, drei Spalten (mobil gestapelt). */
+  --bg: #050a13;
+  --panel: rgba(10, 26, 44, 0.74);
   --line: rgba(98, 214, 255, 0.22);
   --cyan: #62d6ff;
   --amber: #ffb547;
@@ -26,342 +26,487 @@
 }
 * { box-sizing: border-box; }
 html, body { margin: 0; min-height: 100%; }
-body {
-  background:
-    radial-gradient(1200px 600px at 50% -10%, rgba(98,214,255,0.10), transparent 60%),
-    repeating-linear-gradient(0deg, rgba(98,214,255,0.035) 0 1px, transparent 1px 40px),
-    repeating-linear-gradient(90deg, rgba(98,214,255,0.035) 0 1px, transparent 1px 40px),
-    var(--bg);
-  color: var(--text);
-  font-family: var(--body);
-  font-size: 15px;
-  line-height: 1.5;
-}
+body { background: var(--bg); color: var(--text); font-family: var(--body); font-size: 15px; line-height: 1.5; overflow-x: hidden; }
 button, input, select { font: inherit; color: inherit; }
 button { cursor: pointer; }
 :focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
 
-.wrap { max-width: 1280px; margin: 0 auto; padding: 20px 16px 40px; display: flex; flex-direction: column; gap: 18px; }
+#bgfx { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
+.grid-bg { position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background:
+    radial-gradient(1100px 560px at 50% -12%, rgba(98,214,255,0.13), transparent 60%),
+    repeating-linear-gradient(0deg, rgba(98,214,255,0.03) 0 1px, transparent 1px 44px),
+    repeating-linear-gradient(90deg, rgba(98,214,255,0.03) 0 1px, transparent 1px 44px); }
 
-header.top { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); padding-bottom: 14px; }
-.brand { font-family: var(--display); font-weight: 700; letter-spacing: 0.32em; font-size: 13px; color: var(--cyan); }
+/* ---------- Boot ---------- */
+#boot { position: fixed; inset: 0; z-index: 50; background: var(--bg); display: grid; place-content: center; gap: 14px; padding: 24px; font-family: var(--mono); font-size: 13px; color: var(--cyan); transition: opacity .6s ease, visibility .6s; }
+#boot.off { opacity: 0; visibility: hidden; }
+#boot .logo { font-family: var(--display); font-size: clamp(28px, 7vw, 54px); font-weight: 700; letter-spacing: .35em; color: var(--text); text-shadow: 0 0 24px rgba(98,214,255,.6); }
+#boot .lines { min-height: 7.5em; color: var(--muted); }
+#boot .lines div::before { content: "› "; color: var(--cyan); }
+#boot .lines .ok { color: var(--good); }
+#boot .pbar { height: 3px; width: min(420px, 80vw); background: rgba(98,214,255,.12); }
+#boot .pbar i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, var(--cyan), var(--amber)); transition: width .25s; box-shadow: 0 0 12px var(--cyan); }
+#boot button { justify-self: start; background: none; border: 1px solid var(--line); color: var(--muted); padding: 4px 10px; font-family: var(--mono); font-size: 11px; }
+
+/* ---------- Layout ---------- */
+.wrap { position: relative; z-index: 1; max-width: 1320px; margin: 0 auto; padding: 20px 16px 40px; display: flex; flex-direction: column; gap: 18px; }
+
+header.top { position: relative; display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); padding-bottom: 14px; overflow: hidden; }
+header.top::after { content: ""; position: absolute; left: -30%; bottom: -1px; width: 30%; height: 2px; background: linear-gradient(90deg, transparent, var(--cyan), transparent); animation: sweep 5s linear infinite; }
+@keyframes sweep { to { left: 110%; } }
+.brand { font-family: var(--display); font-weight: 700; letter-spacing: .32em; font-size: 13px; color: var(--cyan); position: relative; display: inline-block; }
+.brand.glitch { animation: glitch .35s steps(2) 1; }
+@keyframes glitch { 0% { transform: translate(0); text-shadow: 2px 0 var(--amber), -2px 0 var(--cyan); } 33% { transform: translate(-2px, 1px); } 66% { transform: translate(2px, -1px); text-shadow: -2px 0 var(--amber), 2px 0 var(--bad); } 100% { transform: translate(0); text-shadow: none; } }
 .greet { font-family: var(--display); font-size: clamp(22px, 4vw, 34px); font-weight: 600; margin: 4px 0 0; text-wrap: balance; }
+.sub-greet { color: var(--muted); font-size: 13px; font-family: var(--mono); margin-top: 2px; }
 .clock { font-family: var(--mono); text-align: right; }
-.clock .t { font-size: 28px; color: var(--cyan); font-variant-numeric: tabular-nums; }
+.clock .t { font-size: 30px; color: var(--cyan); font-variant-numeric: tabular-nums; text-shadow: 0 0 14px rgba(98,214,255,.45); }
 .clock .d { color: var(--muted); font-size: 13px; }
 
 .status { display: flex; flex-wrap: wrap; gap: 8px 18px; font-family: var(--mono); font-size: 12px; color: var(--muted); }
 .status b { color: var(--good); font-weight: 600; }
 .status .warn { color: var(--amber); }
+.dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--good); margin-right: 6px; box-shadow: 0 0 8px var(--good); animation: blink 1.6s ease-in-out infinite; vertical-align: 1px; }
+@keyframes blink { 50% { opacity: .25; } }
 
-.grid { display: grid; grid-template-columns: 300px 1fr 320px; gap: 18px; align-items: start; }
-@media (max-width: 1040px) { .grid { grid-template-columns: 1fr 1fr; } .col-quiz { grid-column: 1 / -1; order: -1; } }
+/* Klausurmodus-Band */
+.alert { position: relative; display: grid; grid-template-columns: auto 1fr auto; gap: 18px; align-items: center; padding: 14px 18px; border: 1px solid rgba(255,181,71,.55); background: linear-gradient(90deg, rgba(255,181,71,.14), rgba(255,181,71,.03)); overflow: hidden; }
+.alert::before { content: ""; position: absolute; inset: 0; background: repeating-linear-gradient(-45deg, rgba(255,181,71,.07) 0 10px, transparent 10px 20px); animation: stripes 1.4s linear infinite; pointer-events: none; }
+@keyframes stripes { to { background-position: 28px 0; } }
+.alert .lbl { font-family: var(--display); font-weight: 700; letter-spacing: .2em; color: var(--amber); font-size: 13px; }
+.alert .lbl span { display: block; font-size: 22px; letter-spacing: .05em; color: var(--text); }
+.alert .tip { font-size: 14px; position: relative; }
+.alert .tip b { color: var(--amber); }
+.big-count { font-family: var(--mono); font-size: clamp(22px, 3.4vw, 34px); color: var(--amber); font-variant-numeric: tabular-nums; text-align: right; position: relative; text-shadow: 0 0 16px rgba(255,181,71,.5); }
+.big-count small { display: block; font-size: 11px; color: var(--muted); text-shadow: none; }
+@media (max-width: 760px) { .alert { grid-template-columns: 1fr; gap: 8px; } .big-count { text-align: left; } }
+
+.grid { display: grid; grid-template-columns: 300px 1fr 330px; gap: 18px; align-items: start; }
+@media (max-width: 1060px) { .grid { grid-template-columns: 1fr 1fr; } .col-quiz { grid-column: 1 / -1; order: -1; } }
 @media (max-width: 680px) { .grid { grid-template-columns: 1fr; } }
 .col { display: flex; flex-direction: column; gap: 18px; min-width: 0; }
 
 .panel {
-  position: relative;
-  background: var(--panel);
-  border: 1px solid var(--line);
-  border-radius: 4px;
-  padding: 16px;
-  backdrop-filter: blur(6px);
+  position: relative; background: var(--panel); border: 1px solid var(--line); padding: 16px; backdrop-filter: blur(6px);
   clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 14px 100%, 0 calc(100% - 14px));
+  animation: rise .7s cubic-bezier(.2,.8,.2,1) both; animation-delay: calc(var(--i, 0) * 90ms + 1.9s);
+  transition: border-color .25s, box-shadow .25s;
 }
-.panel h2 { margin: 0 0 12px; font-family: var(--display); font-size: 13px; font-weight: 600; letter-spacing: 0.22em; text-transform: uppercase; color: var(--cyan); display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.panel:hover { border-color: rgba(98,214,255,.5); box-shadow: inset 0 0 30px rgba(98,214,255,.06); }
+.panel::before { content: ""; position: absolute; top: 0; left: 0; width: 22px; height: 22px; border-top: 2px solid var(--cyan); border-left: 2px solid var(--cyan); opacity: .7; }
+@keyframes rise { from { opacity: .001; transform: translateY(14px); filter: blur(3px); } to { opacity: 1; transform: none; filter: none; } }
+.panel h2 { margin: 0 0 12px; font-family: var(--display); font-size: 13px; font-weight: 600; letter-spacing: .22em; text-transform: uppercase; color: var(--cyan); display: flex; justify-content: space-between; align-items: center; gap: 8px; }
 .panel h2 small { font-family: var(--mono); letter-spacing: 0; text-transform: none; color: var(--muted); font-size: 11px; }
 
 /* Reaktor */
-.core { display: grid; place-items: center; padding: 6px 0 2px; }
+.core { display: grid; place-items: center; padding: 4px 0 2px; }
 .core-box { position: relative; width: 240px; max-width: 100%; aspect-ratio: 1; }
 .core-box canvas { width: 100%; height: 100%; display: block; }
 .core-read { position: absolute; inset: 0; display: grid; place-content: center; text-align: center; }
-.core-read .big { font-family: var(--display); font-size: 44px; font-weight: 700; line-height: 1; color: var(--text); font-variant-numeric: tabular-nums; }
-.core-read .lbl { font-family: var(--mono); font-size: 11px; color: var(--muted); letter-spacing: 0.08em; margin-top: 4px; }
-.core-note { font-size: 12px; color: var(--muted); text-align: center; margin: 6px 0 0; }
-
+.core-read .big { font-family: var(--display); font-size: 42px; font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; }
+.core-read .lbl { font-family: var(--mono); font-size: 10px; color: var(--muted); letter-spacing: .08em; margin-top: 6px; }
+.note { font-size: 12px; color: var(--muted); text-align: center; margin: 6px 0 0; }
 .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 12px; }
 .stat { border: 1px solid var(--line); padding: 8px; text-align: center; }
 .stat .v { font-family: var(--mono); font-size: 20px; color: var(--cyan); font-variant-numeric: tabular-nums; }
 .stat .k { font-size: 11px; color: var(--muted); }
+.stat.hot .v { color: var(--amber); animation: flame 0.9s ease-in-out infinite alternate; }
+@keyframes flame { to { text-shadow: 0 0 14px var(--amber); transform: scale(1.08); } }
 
 .bars { display: flex; flex-direction: column; gap: 9px; }
-.bar-row { display: grid; grid-template-columns: 96px 1fr 44px; gap: 8px; align-items: center; font-size: 13px; }
-.bar { height: 6px; background: rgba(98,214,255,0.10); position: relative; }
-.bar i { position: absolute; inset: 0 auto 0 0; background: linear-gradient(90deg, var(--cyan), var(--amber)); }
+.bar-row { display: grid; grid-template-columns: 104px 1fr 40px; gap: 8px; align-items: center; font-size: 13px; }
+.bar { height: 6px; background: rgba(98,214,255,0.10); position: relative; overflow: hidden; }
+.bar i { position: absolute; inset: 0 auto 0 0; width: 0; background: linear-gradient(90deg, var(--cyan), var(--amber)); transition: width 1s cubic-bezier(.2,.8,.2,1); }
 .bar-row .p { font-family: var(--mono); font-size: 12px; color: var(--muted); text-align: right; font-variant-numeric: tabular-nums; }
+
+/* Heute */
+.day { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 6px; }
+.day li { display: grid; grid-template-columns: 92px 1fr; gap: 10px; padding: 6px 8px; border-left: 2px solid var(--line); font-size: 14px; }
+.day li .tm { font-family: var(--mono); font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; padding-top: 1px; }
+.day li.past { opacity: .45; }
+.day li.now { border-left-color: var(--amber); background: rgba(255,181,71,.08); }
+.day li.now .tm { color: var(--amber); }
+.day li.exam b { color: var(--bad); }
+.day .pill { font-family: var(--mono); font-size: 10px; border: 1px solid currentColor; padding: 0 4px; margin-left: 6px; }
 
 /* Quiz */
 .jarvis-line { font-family: var(--mono); font-size: 13px; color: var(--amber); min-height: 1.5em; margin: 0 0 12px; }
 .jarvis-line::before { content: "› "; color: var(--cyan); }
+.jarvis-line .cur { display: inline-block; width: 7px; height: 1em; background: var(--amber); vertical-align: -2px; margin-left: 2px; animation: blink 1s steps(1) infinite; }
 .q-meta { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
 .chip { font-family: var(--mono); font-size: 11px; padding: 2px 8px; border: 1px solid var(--line); color: var(--muted); }
 .chip.topic { color: var(--cyan); border-color: rgba(98,214,255,0.5); }
-.chip.afb { color: var(--amber); border-color: rgba(255,181,71,0.5); }
+.chip.ex { color: var(--bad); border-color: rgba(255,107,122,.6); }
 .q-text { font-family: var(--display); font-size: clamp(18px, 2.4vw, 23px); font-weight: 600; margin: 0 0 16px; text-wrap: balance; }
+.q-anim { animation: qin .45s cubic-bezier(.2,.8,.2,1) both; }
+@keyframes qin { from { opacity: .001; transform: translateX(18px); } to { opacity: 1; transform: none; } }
 .answers { display: grid; gap: 10px; }
-.ans {
-  text-align: left; padding: 12px 14px; background: rgba(98,214,255,0.05); border: 1px solid var(--line);
-  display: grid; grid-template-columns: 26px 1fr; gap: 10px; align-items: start; transition: background .15s, border-color .15s;
-}
-.ans:hover:not(:disabled) { background: rgba(98,214,255,0.12); border-color: var(--cyan); }
+.ans { position: relative; text-align: left; padding: 12px 14px; background: rgba(98,214,255,0.05); border: 1px solid var(--line); display: grid; grid-template-columns: 26px 1fr; gap: 10px; align-items: start; transition: background .15s, border-color .15s, transform .15s; overflow: hidden; }
+.ans:hover:not(:disabled) { background: rgba(98,214,255,0.12); border-color: var(--cyan); transform: translateX(4px); }
 .ans .key { font-family: var(--mono); color: var(--cyan); }
-.ans.right { border-color: var(--good); background: rgba(77,227,165,0.12); }
-.ans.wrong { border-color: var(--bad); background: rgba(255,107,122,0.12); }
+.ans.right { border-color: var(--good); background: rgba(77,227,165,0.14); animation: pulseok .6s ease; }
+.ans.wrong { border-color: var(--bad); background: rgba(255,107,122,0.14); animation: shake .45s ease; }
+@keyframes pulseok { 40% { box-shadow: 0 0 0 4px rgba(77,227,165,.35); } }
+@keyframes shake { 20%,60% { transform: translateX(-6px); } 40%,80% { transform: translateX(6px); } }
 .ans:disabled { cursor: default; }
-.explain { margin-top: 14px; padding: 12px 14px; border-left: 3px solid var(--amber); background: rgba(255,181,71,0.07); font-size: 14px; }
+.explain { margin-top: 14px; padding: 12px 14px; border-left: 3px solid var(--amber); background: rgba(255,181,71,0.07); font-size: 14px; animation: qin .4s ease both; }
 .explain[hidden] { display: none; }
 .row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 14px; }
-.btn { padding: 9px 16px; border: 1px solid var(--cyan); background: rgba(98,214,255,0.10); font-family: var(--display); font-weight: 600; letter-spacing: 0.08em; }
+.btn { position: relative; overflow: hidden; padding: 9px 16px; border: 1px solid var(--cyan); background: rgba(98,214,255,0.10); font-family: var(--display); font-weight: 600; letter-spacing: .08em; }
+.btn::after { content: ""; position: absolute; top: 0; left: -60%; width: 40%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,.18), transparent); transform: skewX(-20deg); transition: left .5s; }
+.btn:hover::after { left: 120%; }
 .btn:hover { background: rgba(98,214,255,0.22); }
 .btn.ghost { border-color: var(--line); background: transparent; color: var(--muted); }
 .btn.amber { border-color: var(--amber); background: rgba(255,181,71,0.12); color: var(--amber); }
 .sel { padding: 8px 10px; background: var(--bg); border: 1px solid var(--line); }
 .toggle { display: inline-flex; gap: 6px; align-items: center; font-size: 13px; color: var(--muted); }
+#fx { position: fixed; inset: 0; pointer-events: none; z-index: 40; width: 100%; height: 100%; }
 
 /* Countdown */
 .exams { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
-.exam { display: grid; grid-template-columns: 58px 1fr auto; gap: 10px; align-items: center; padding: 8px 10px; border: 1px solid var(--line); border-left: 3px solid var(--cyan); }
+.exam { display: grid; grid-template-columns: 58px 1fr auto; gap: 10px; align-items: center; padding: 8px 10px; border: 1px solid var(--line); border-left: 3px solid var(--cyan); transition: transform .2s; }
+.exam:hover { transform: translateX(3px); }
 .exam.soon { border-left-color: var(--amber); }
-.exam.now { border-left-color: var(--bad); }
+.exam.now { border-left-color: var(--bad); animation: alarm 1.6s ease-in-out infinite; }
+@keyframes alarm { 50% { box-shadow: inset 4px 0 18px rgba(255,107,122,.25); } }
 .exam .days { font-family: var(--mono); font-size: 22px; text-align: center; line-height: 1; font-variant-numeric: tabular-nums; }
 .exam .days small { display: block; font-size: 10px; color: var(--muted); margin-top: 3px; }
 .exam .what { min-width: 0; }
 .exam .what b { display: block; font-weight: 600; }
-.exam .what .sub { display:block; font-size: 12px; color: var(--muted); overflow-wrap: anywhere; }
+.exam .what .sub { display: block; font-size: 12px; color: var(--muted); }
 .exam .x { background: none; border: 0; color: var(--muted); font-size: 18px; padding: 2px 6px; }
 .exam .x:hover { color: var(--bad); }
-.example-tag { font-family: var(--mono); font-size: 10px; color: var(--amber); border: 1px solid rgba(255,181,71,0.5); padding: 0 4px; margin-left: 4px; }
-form.add { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
-form.add input { padding: 8px 10px; background: var(--bg); border: 1px solid var(--line); min-width: 0; }
-form.add .full { grid-column: 1 / -1; }
-form.add label { display: flex; flex-direction: column; gap: 3px; font-size: 11px; color: var(--muted); }
+.exam .x[hidden] { display: none; }
+.event { font-size: 12px; color: var(--muted); display: grid; grid-template-columns: 52px 1fr; gap: 8px; padding: 3px 0; }
+.event span:first-child { font-family: var(--mono); color: var(--cyan); }
+details.add { margin-top: 12px; }
+details.add summary { cursor: pointer; font-size: 13px; color: var(--muted); }
+form.addf { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
+form.addf input { padding: 8px 10px; background: var(--bg); border: 1px solid var(--line); min-width: 0; }
+form.addf .full { grid-column: 1 / -1; }
+form.addf label { display: flex; flex-direction: column; gap: 3px; font-size: 11px; color: var(--muted); }
 
 /* Timer */
-.timer { display: grid; place-items: center; gap: 10px; }
-.timer .tt { font-family: var(--mono); font-size: 46px; color: var(--cyan); font-variant-numeric: tabular-nums; line-height: 1; }
-.timer .phase { font-family: var(--display); letter-spacing: 0.2em; font-size: 12px; color: var(--amber); text-transform: uppercase; }
-.tbar { width: 100%; height: 4px; background: rgba(98,214,255,0.10); }
-.tbar i { display: block; height: 100%; width: 0; background: var(--cyan); transition: width 1s linear; }
+.timer { display: grid; place-items: center; gap: 8px; }
+.tring { position: relative; width: 170px; height: 170px; }
+.tring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+.tring circle { fill: none; stroke-width: 6; }
+.tring .bgc { stroke: rgba(98,214,255,.12); }
+.tring .fg { stroke: var(--cyan); stroke-linecap: round; transition: stroke-dashoffset 1s linear, stroke .3s; filter: drop-shadow(0 0 6px var(--cyan)); }
+.tring.brk .fg { stroke: var(--good); filter: drop-shadow(0 0 6px var(--good)); }
+.tring .tc { position: absolute; inset: 0; display: grid; place-content: center; text-align: center; }
+.tring .tt { font-family: var(--mono); font-size: 36px; color: var(--text); font-variant-numeric: tabular-nums; line-height: 1; }
+.tring .phase { font-family: var(--display); letter-spacing: .2em; font-size: 11px; color: var(--amber); text-transform: uppercase; margin-top: 6px; }
+.running .tring { animation: breathe 4s ease-in-out infinite; }
+@keyframes breathe { 50% { transform: scale(1.03); } }
 
 .term .word { font-family: var(--display); font-size: 20px; font-weight: 600; color: var(--amber); }
+.term .fach { font-family: var(--mono); font-size: 11px; color: var(--cyan); }
 .term p { margin: 6px 0 0; font-size: 14px; }
 
-footer { color: var(--muted); font-size: 12px; text-align: center; font-family: var(--mono); }
+footer { position: relative; z-index: 1; color: var(--muted); font-size: 12px; text-align: center; font-family: var(--mono); padding-bottom: 20px; }
 
-@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
 </style>
 </head>
 <body>
+<div class="grid-bg"></div>
+<canvas id="bgfx" aria-hidden="true"></canvas>
+<canvas id="fx" aria-hidden="true"></canvas>
+
+<div id="boot" role="status" aria-live="polite">
+  <div class="logo">J.A.R.V.I.S.</div>
+  <div class="lines" id="boot-lines"></div>
+  <div class="pbar"><i id="boot-bar"></i></div>
+  <button type="button" id="boot-skip">Überspringen</button>
+</div>
+
 <div class="wrap">
   <header class="top">
     <div>
-      <div class="brand">J.A.R.V.I.S. · LERNZENTRALE</div>
+      <div class="brand" id="brand">J.A.R.V.I.S. · LERNZENTRALE</div>
       <h1 class="greet" id="greet">Guten Tag, Sir.</h1>
+      <div class="sub-greet" id="sub-greet"></div>
     </div>
     <div class="clock"><div class="t" id="clock">--:--:--</div><div class="d" id="date"></div></div>
   </header>
 
   <div class="status" aria-label="Systemstatus">
-    <span>KERN: <b>ONLINE</b></span>
-    <span>MISSION: <b>FACHABI GESUNDHEIT &amp; SOZIALES</b></span>
+    <span><i class="dot"></i>KERN: <b>ONLINE</b></span>
+    <span>KLASSE: <b>FOS 11 · GESUNDHEIT &amp; SOZIALES</b></span>
     <span>ZIELNOTE: <span class="warn">1,0</span></span>
-    <span id="status-exam">NÄCHSTE KLAUSUR: –</span>
+    <span id="status-week"></span>
   </div>
 
+  <section class="alert" id="alert" aria-live="polite">
+    <div class="lbl" id="alert-lbl">KLAUSURMODUS<span>–</span></div>
+    <div class="tip" id="alert-tip"></div>
+    <div class="big-count" id="alert-count">--:--:--:--<small>TAGE · STD · MIN · SEK</small></div>
+  </section>
+
   <div class="grid">
-    <!-- Linke Spalte -->
     <div class="col">
-      <section class="panel">
+      <section class="panel" style="--i:0">
         <h2>Leistungskern <small>Quiz-Trefferquote</small></h2>
-        <div class="core">
-          <div class="core-box">
-            <canvas id="core" width="480" height="480" aria-hidden="true"></canvas>
-            <div class="core-read"><div class="big" id="core-pct">0%</div><div class="lbl" id="core-np">– NOTENPUNKTE</div></div>
-          </div>
-        </div>
-        <p class="core-note">Schätzung aus dem Quiz, keine echte Zeugnisnote.</p>
+        <div class="core"><div class="core-box">
+          <canvas id="core" width="480" height="480" aria-hidden="true"></canvas>
+          <div class="core-read"><div class="big" id="core-pct">0%</div><div class="lbl" id="core-np">– NOTENPUNKTE</div></div>
+        </div></div>
+        <p class="note">Schätzung aus dem Quiz, keine echte Zeugnisnote.</p>
         <div class="stats">
           <div class="stat"><div class="v" id="s-total">0</div><div class="k">Fragen</div></div>
-          <div class="stat"><div class="v" id="s-streak">0</div><div class="k">Serie</div></div>
+          <div class="stat" id="streak-box"><div class="v" id="s-streak">0</div><div class="k">Serie</div></div>
           <div class="stat"><div class="v" id="s-best">0</div><div class="k">Rekord</div></div>
         </div>
       </section>
-
-      <section class="panel">
-        <h2>Themenanalyse</h2>
+      <section class="panel" style="--i:3">
+        <h2>Fächeranalyse <small>wo es noch hakt</small></h2>
         <div class="bars" id="bars"></div>
       </section>
     </div>
 
-    <!-- Mitte: Quiz -->
     <div class="col col-quiz">
-      <section class="panel" aria-live="polite">
+      <section class="panel" style="--i:1" aria-live="polite">
         <h2>Abfrage-Protokoll <small id="q-count"></small></h2>
-        <p class="jarvis-line" id="jline">Bereit, wenn Sie es sind, Sir.</p>
-        <div class="q-meta"><span class="chip topic" id="q-topic"></span><span class="chip afb" id="q-afb"></span></div>
-        <p class="q-text" id="q-text"></p>
-        <div class="answers" id="answers"></div>
+        <p class="jarvis-line" id="jline"></p>
+        <div id="qbox">
+          <div class="q-meta"><span class="chip topic" id="q-topic"></span><span class="chip ex" id="q-ex" hidden></span></div>
+          <p class="q-text" id="q-text"></p>
+          <div class="answers" id="answers"></div>
+        </div>
         <div class="explain" id="explain" hidden></div>
         <div class="row">
           <button class="btn" id="next" type="button">Nächste Frage ›</button>
-          <label for="filter" class="toggle">Thema
-            <select id="filter" class="sel">
-              <option value="alle">Alle</option>
-            </select>
+          <label for="filter" class="toggle">Fach
+            <select id="filter" class="sel"><option value="klausur">Nächste Klausuren zuerst</option><option value="alle">Alle Fächer</option></select>
           </label>
           <label class="toggle" for="voice"><input type="checkbox" id="voice"> Jarvis spricht</label>
         </div>
       </section>
-
-      <section class="panel term">
+      <section class="panel term" style="--i:4">
         <h2>Fachbegriff des Tages <small>klausurfest formulieren</small></h2>
+        <div class="fach" id="term-fach"></div>
         <div class="word" id="term-word"></div>
         <p id="term-def"></p>
       </section>
     </div>
 
-    <!-- Rechte Spalte -->
     <div class="col">
-      <section class="panel">
-        <h2>Klausur-Countdown <small>lokal gespeichert</small></h2>
-        <ul class="exams" id="exams"></ul>
-        <form class="add" id="add">
-          <label>Fach<input id="f-fach" required placeholder="z. B. Gesundheit"></label>
-          <label>Datum<input id="f-date" type="date" required></label>
-          <label class="full">Thema<input id="f-thema" placeholder="z. B. Prävention"></label>
-          <button class="btn full" type="submit">Klausur eintragen</button>
-        </form>
+      <section class="panel" style="--i:2">
+        <h2 id="day-title">Heute</h2>
+        <ul class="day" id="day"></ul>
       </section>
-
-      <section class="panel">
+      <section class="panel" style="--i:5">
+        <h2>Klausuren &amp; Termine <small>1. Halbjahr</small></h2>
+        <ul class="exams" id="exams"></ul>
+        <div id="events" style="margin-top:10px"></div>
+        <details class="add"><summary>Weitere Klausur eintragen</summary>
+          <form class="addf" id="add">
+            <label>Fach<input id="f-fach" required placeholder="z. B. Deutsch"></label>
+            <label>Datum<input id="f-date" type="date" required></label>
+            <label class="full">Thema<input id="f-thema" placeholder="z. B. Gedichtanalyse"></label>
+            <button class="btn full" type="submit">Eintragen</button>
+          </form>
+        </details>
+      </section>
+      <section class="panel" style="--i:6">
         <h2>Fokus-Modus <small>25 / 5 Minuten</small></h2>
-        <div class="timer">
-          <div class="phase" id="t-phase">Lernblock</div>
-          <div class="tt" id="t-time">25:00</div>
-          <div class="tbar"><i id="t-bar"></i></div>
-          <div class="row" style="margin-top:4px">
+        <div class="timer" id="timer">
+          <div class="tring" id="tring">
+            <svg viewBox="0 0 100 100"><circle class="bgc" cx="50" cy="50" r="44"></circle><circle class="fg" id="t-arc" cx="50" cy="50" r="44"></circle></svg>
+            <div class="tc"><div class="tt" id="t-time">25:00</div><div class="phase" id="t-phase">Lernblock</div></div>
+          </div>
+          <div class="row" style="margin-top:2px">
             <button class="btn amber" id="t-start" type="button">Start</button>
             <button class="btn ghost" id="t-reset" type="button">Zurücksetzen</button>
           </div>
-          <div class="core-note" id="t-done">Abgeschlossene Blöcke heute: 0</div>
+          <div class="note" id="t-done">Abgeschlossene Blöcke heute: 0</div>
         </div>
       </section>
     </div>
   </div>
-
-  <footer>Jarvis · gebaut für das Fachabitur Gesundheit &amp; Soziales · Daten bleiben in diesem Browser</footer>
+  <footer>Jarvis · FOS22.1 AS · Daten aus „Fahrplan 1,5“ (Stand 23.09.2026) · Fortschritt bleibt in diesem Browser</footer>
 </div>
 
 <script>
 (() => {
 "use strict";
-
-/* ---------- Speicher ---------- */
+const $ = id => document.getElementById(id);
+const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
 const store = {
-  get(k, d) { try { const v = localStorage.getItem("jarvis." + k); return v ? JSON.parse(v) : d; } catch { return d; } },
-  set(k, v) { try { localStorage.setItem("jarvis." + k, JSON.stringify(v)); } catch {} }
+  get(k, d) { try { const v = localStorage.getItem("jarvis2." + k); return v ? JSON.parse(v) : d; } catch { return d; } },
+  set(k, v) { try { localStorage.setItem("jarvis2." + k, JSON.stringify(v)); } catch {} }
 };
 
-/* ---------- Fragenbank ---------- */
+/* ================= Daten aus dem Fahrplan ================= */
+const EXAMS = [
+  { fach: "Sozialkunde", date: "2026-11-05", s: "09:45", std: "3./4. Stunde" },
+  { fach: "Deutsch", date: "2026-11-05", s: "13:30", std: "7./8. Stunde" },
+  { fach: "Englisch", date: "2026-11-13", s: "11:45", std: "5./6. Stunde" },
+  { fach: "Mathematik", date: "2026-11-20", s: "13:30", std: "7./8. Stunde" },
+  { fach: "Biologie", date: "2026-11-26", s: "11:45", std: "5./6. Stunde" },
+  { fach: "Recht", date: "2026-12-04", s: "09:45", std: "3./4. Stunde" },
+  { fach: "Sozialkunde", date: "2027-01-07", s: "09:45", std: "3./4. Stunde" }
+];
+const EVENTS = [
+  ["2026-11-22", "Notenabgabe"], ["2026-11-25", "Leistungsbeurteilungen kommen"], ["2026-11-27", "Lehrersprechtag 16:00–19:30"],
+  ["2026-12-18", "Letzter Schultag 2026"], ["2026-12-21", "Weihnachtsferien bis 01.01."], ["2027-01-04", "Erster Schultag 2027"],
+  ["2027-01-28", "Zeugnisausgabe"], ["2027-01-29", "Winterferien bis 05.02."]
+];
+const FERIEN = [["Herbstferien", "2026-10-19", "2026-10-30"], ["Weihnachtsferien", "2026-12-21", "2027-01-01"], ["Winterferien", "2027-01-29", "2027-02-05"]];
+const WEEK = {
+  1: { head: "Praxistag", items: [["06:45", "07:50", "Aufstehen · Hunderunde · Frühstück"], ["07:50", "09:15", "Lernblock zu Hause (Mathe + Deutsch)"], ["09:50", "10:05", "Karteikarten in der Bahn"], ["11:00", "20:00", "Praxis"], ["22:45", null, "Licht aus"]] },
+  2: { head: "Praxistag", items: [["06:45", "07:50", "Aufstehen · Hunderunde · Frühstück"], ["07:50", "09:15", "Lernblock: Deutsch schreiben + Mathe gemischt"], ["09:50", "10:05", "Karteikarten in der Bahn"], ["11:00", "20:00", "Praxis"], ["22:45", null, "Licht aus"]] },
+  3: { head: "Praxistag", items: [["09:00", "18:00", "Praxis"], ["19:30", "20:00", "Donnerstag vorbereiten: HA + eine Frage pro Fach"], ["22:45", null, "Licht aus"]] },
+  4: { head: "Schultag · Raum 2.11", items: [["06:30", "06:50", "Karteikarten in der Bahn"], ["08:00", "09:30", "Soziologie"], ["09:45", "11:15", "Sozialkunde"], ["11:45", "13:15", "Biologie"], ["13:30", "15:00", "Deutsch"], ["15:15", "16:00", "Digitalisierung"], ["16:00", "16:20", "Karten schreiben (3–5 pro Fach)"], ["18:00", "18:45", "Freitag vorbereiten: Mathe-HA, Recht, Englisch"]] },
+  5: { head: "Schultag · Raum 2.6", items: [["07:40", "08:00", "Freitags-Check: alle HA da?"], ["08:15", "08:35", "Karten: Recht-Begriffe, Englisch-Vokabeln"], ["09:45", "11:15", "Recht"], ["11:45", "13:15", "Englisch"], ["13:30", "15:00", "Mathematik"], ["15:10", "15:30", "Mathe-Nachbereitung: 3 Aufgaben neu rechnen"]] },
+  6: { head: "Wochenende", items: [["10:00", "11:00", "Lernblock: Blurting + fällige Karten"]] },
+  0: { head: "Wochenende", items: [["10:00", "11:00", "Lernblock: Wochenplanung + Karten"]] }
+};
+
+/* ================= Fragenbank (deine Fächer) ================= */
 const Q = [
-  { t: "Gesundheit", a: "I", q: "Wer hat das Modell der Salutogenese entwickelt?", o: ["Aaron Antonovsky", "George L. Engel", "Hans Selye", "Abraham Maslow"], c: 0, e: "Antonovsky fragte nicht „Was macht krank?“, sondern „Was hält gesund?“ – Kernbegriff: Kohärenzgefühl (SOC)." },
-  { t: "Gesundheit", a: "I", q: "Welche drei Komponenten bilden das Kohärenzgefühl?", o: ["Verstehbarkeit, Handhabbarkeit, Bedeutsamkeit", "Motivation, Wissen, Können", "Körper, Geist, Umwelt", "Alarm, Widerstand, Erschöpfung"], c: 0, e: "Verstehbarkeit (kognitiv), Handhabbarkeit (Ressourcen), Bedeutsamkeit/Sinnhaftigkeit (motivational)." },
-  { t: "Gesundheit", a: "I", q: "Wie definiert die WHO-Verfassung (1946) Gesundheit?", o: ["Zustand vollständigen körperlichen, geistigen und sozialen Wohlbefindens", "Abwesenheit von Krankheit und Gebrechen", "Fähigkeit, arbeiten zu können", "Gleichgewicht von Risikofaktoren"], c: 0, e: "„… und nicht nur das Fehlen von Krankheit oder Gebrechen.“ Kritik: „vollständig“ ist kaum erreichbar, eher Ideal als Zustand." },
-  { t: "Gesundheit", a: "II", q: "Eine Mammografie-Untersuchung zur Brustkrebsfrüherkennung ist …", o: ["Sekundärprävention", "Primärprävention", "Tertiärprävention", "Verhältnisprävention"], c: 0, e: "Sekundärprävention = Früherkennung bereits bestehender, noch symptomloser Erkrankungen (Screening)." },
-  { t: "Gesundheit", a: "II", q: "Eine Reha nach einem Herzinfarkt zählt zur …", o: ["Tertiärprävention", "Primärprävention", "Sekundärprävention", "Gesundheitsförderung im Setting Schule"], c: 0, e: "Tertiärprävention: Folgeschäden und Rückfälle bei bereits Erkrankten verhindern." },
-  { t: "Gesundheit", a: "II", q: "Welche Maßnahme ist Verhältnisprävention?", o: ["Rauchverbot in Gaststätten", "Nichtraucherkurs bei der Krankenkasse", "Aufklärungsflyer über Zucker", "Persönlicher Trainingsplan"], c: 0, e: "Verhältnisprävention verändert Lebensbedingungen/Umwelt; Verhaltensprävention setzt beim Verhalten des Einzelnen an." },
-  { t: "Gesundheit", a: "I", q: "Welches Dokument von 1986 gilt als Grundlage der Gesundheitsförderung?", o: ["Ottawa-Charta", "Genfer Gelöbnis", "Alma-Ata-Erklärung", "Sozialgesetzbuch V"], c: 0, e: "Ottawa-Charta (WHO, 1986): Handlungsstrategien befähigen, vermitteln, vertreten (advocate)." },
-  { t: "Gesundheit", a: "I", q: "Wer formulierte 1977 das biopsychosoziale Modell?", o: ["George L. Engel", "Aaron Antonovsky", "Klaus Hurrelmann", "Richard Lazarus"], c: 0, e: "Engel: Krankheit entsteht im Zusammenspiel biologischer, psychischer und sozialer Faktoren – Gegenentwurf zum rein biomedizinischen Modell." },
-  { t: "Gesundheit", a: "II", q: "Was beschreibt die Inzidenz?", o: ["Anzahl der Neuerkrankungen in einem Zeitraum", "Anzahl aller Erkrankten zu einem Zeitpunkt", "Anteil der Todesfälle unter Erkrankten", "Durchschnittliche Krankheitsdauer"], c: 0, e: "Inzidenz = Neuerkrankungen. Prävalenz = alle Erkrankten (Bestand) zu einem Zeitpunkt oder in einem Zeitraum." },
-  { t: "Gesundheit", a: "I", q: "Welche ist KEINE Säule der gesetzlichen Sozialversicherung?", o: ["Haftpflichtversicherung", "Pflegeversicherung", "Unfallversicherung", "Arbeitslosenversicherung"], c: 0, e: "Die fünf Säulen: Kranken-, Renten-, Arbeitslosen-, Unfall- und Pflegeversicherung." },
-  { t: "Gesundheit", a: "II", q: "Im transaktionalen Stressmodell nach Lazarus bewertet man in der sekundären Bewertung …", o: ["die eigenen Bewältigungsressourcen", "ob die Situation irrelevant oder bedrohlich ist", "den Hormonspiegel", "die Reaktion der Mitmenschen"], c: 0, e: "Primär: Ist das relevant/bedrohlich? Sekundär: Kann ich das bewältigen? Danach Coping und Neubewertung." },
-  { t: "Gesundheit", a: "I", q: "Die Phasen des Allgemeinen Adaptationssyndroms nach Selye lauten …", o: ["Alarmreaktion, Widerstand, Erschöpfung", "Forming, Storming, Norming", "Wahrnehmen, Bewerten, Handeln", "Verstehen, Handhaben, Bewerten"], c: 0, e: "Selye beschreibt die körperliche Stressreaktion: Alarm → Widerstand (Anpassung) → Erschöpfung bei Dauerstress." },
-  { t: "Biologie", a: "I", q: "Wo wird Insulin gebildet?", o: ["In den Betazellen der Bauchspeicheldrüse", "In der Leber", "In der Nebennierenrinde", "In der Schilddrüse"], c: 0, e: "Langerhans-Inseln des Pankreas: Betazellen → Insulin (senkt Blutzucker), Alphazellen → Glukagon (hebt ihn)." },
-  { t: "Biologie", a: "II", q: "Was kennzeichnet Diabetes mellitus Typ 1?", o: ["Absoluter Insulinmangel durch Zerstörung der Betazellen", "Insulinresistenz vor allem durch Übergewicht", "Zu viel Glukagon", "Ein Mangel an Vitamin D"], c: 0, e: "Typ 1: Autoimmunerkrankung, Insulin muss zugeführt werden. Typ 2: Insulinresistenz, stark lebensstilabhängig." },
-  { t: "Biologie", a: "II", q: "Ab welchem BMI spricht die WHO von Adipositas?", o: ["30", "25", "27,5", "35"], c: 0, e: "BMI = Gewicht (kg) ÷ Größe (m)². 25–29,9 Übergewicht (Präadipositas), ab 30 Adipositas." },
-  { t: "Biologie", a: "I", q: "Wohin pumpt die rechte Herzkammer das Blut?", o: ["In die Lungenarterie (Lungenkreislauf)", "In die Aorta (Körperkreislauf)", "In den rechten Vorhof", "In die Hohlvene"], c: 0, e: "Rechts: sauerstoffarmes Blut → Lunge. Links: sauerstoffreiches Blut → Aorta → Körper." },
-  { t: "Biologie", a: "I", q: "Welche Zellen bilden Antikörper?", o: ["B-Lymphozyten (als Plasmazellen)", "Rote Blutkörperchen", "Blutplättchen", "Fresszellen (Makrophagen)"], c: 0, e: "B-Zellen differenzieren zu Plasmazellen und bilden Antikörper – Teil der spezifischen (erworbenen) Abwehr." },
-  { t: "Psychologie", a: "I", q: "Welche Krise steht im Jugendalter nach Erikson im Mittelpunkt?", o: ["Identität vs. Identitätsdiffusion", "Urvertrauen vs. Urmisstrauen", "Intimität vs. Isolation", "Werksinn vs. Minderwertigkeit"], c: 0, e: "Stufe 5 (Adoleszenz): Wer bin ich? Gelingt die Krise, entsteht eine stabile Identität." },
-  { t: "Psychologie", a: "I", q: "Welches Stadium nach Piaget gilt etwa von 7 bis 11 Jahren?", o: ["Konkret-operationales Stadium", "Sensomotorisches Stadium", "Präoperationales Stadium", "Formal-operationales Stadium"], c: 0, e: "Konkret-operational: logisches Denken an konkreten Dingen, Invarianz/Erhaltung wird verstanden." },
-  { t: "Psychologie", a: "II", q: "Ein Kind räumt auf, damit das Meckern der Eltern aufhört. Das ist …", o: ["Negative Verstärkung", "Positive Bestrafung", "Positive Verstärkung", "Löschung"], c: 0, e: "Negative Verstärkung = Wegfall eines unangenehmen Reizes → Verhalten wird häufiger. Nicht mit Bestrafung verwechseln!" },
-  { t: "Psychologie", a: "I", q: "Wer ist mit der klassischen Konditionierung verbunden?", o: ["Iwan Pawlow", "B. F. Skinner", "Albert Bandura", "Jean Piaget"], c: 0, e: "Pawlows Hund: neutraler Reiz (Glocke) wird durch Kopplung mit Futter zum konditionierten Reiz für Speichelfluss." },
-  { t: "Psychologie", a: "II", q: "Kinder schlagen eine Puppe, nachdem sie das bei Erwachsenen gesehen haben. Welche Theorie erklärt das?", o: ["Lernen am Modell (Bandura)", "Operante Konditionierung (Skinner)", "Bindungstheorie (Bowlby)", "Stufenmodell (Erikson)"], c: 0, e: "Bobo-Doll-Experiment: Aneignungs- und Ausführungsphase; ob gezeigt wird, hängt von Konsequenzen ab (stellvertretende Verstärkung)." },
-  { t: "Psychologie", a: "I", q: "Die unterste Stufe der Bedürfnispyramide nach Maslow umfasst …", o: ["Physiologische Bedürfnisse", "Sicherheitsbedürfnisse", "Soziale Bedürfnisse", "Selbstverwirklichung"], c: 0, e: "Von unten: physiologisch → Sicherheit → sozial → Anerkennung/Wertschätzung → Selbstverwirklichung." },
-  { t: "Psychologie", a: "I", q: "Mit welchem Verfahren untersuchte Mary Ainsworth Bindungstypen?", o: ["Fremde Situation", "Bobo-Doll-Experiment", "Marshmallow-Test", "Stanford-Prison-Experiment"], c: 0, e: "Fremde Situation: Trennung und Wiedervereinigung mit der Bezugsperson → sicher, unsicher-vermeidend, unsicher-ambivalent (später: desorganisiert)." },
-  { t: "Pädagogik", a: "I", q: "Welcher Satz stammt aus Watzlawicks Axiomen?", o: ["Man kann nicht nicht kommunizieren.", "Jede Nachricht hat vier Seiten.", "Der Mensch ist, was er isst.", "Lernen ist Verhaltensänderung."], c: 0, e: "Erstes Axiom: Auch Schweigen oder Wegschauen ist Kommunikation." },
-  { t: "Pädagogik", a: "I", q: "Welche vier Seiten hat eine Nachricht nach Schulz von Thun?", o: ["Sachinhalt, Selbstoffenbarung, Beziehung, Appell", "Sender, Empfänger, Kanal, Code", "Inhalt, Form, Ziel, Wirkung", "Ich, Du, Wir, Es"], c: 0, e: "Kommunikationsquadrat / Vier-Ohren-Modell – sehr klausurbeliebt mit Fallbeispiel!" },
-  { t: "Pädagogik", a: "I", q: "Welche Erziehungsstile unterschied Kurt Lewin?", o: ["Autoritär, demokratisch, laissez-faire", "Autoritativ, permissiv, vernachlässigend", "Streng, liebevoll, gleichgültig", "Lenkend, fördernd, fordernd"], c: 0, e: "Lewin (1939). Baumrind ergänzt später: autoritativ, autoritär, permissiv (und vernachlässigend)." },
-  { t: "Pädagogik", a: "I", q: "Wie heißen die ersten vier Gruppenphasen nach Tuckman?", o: ["Forming, Storming, Norming, Performing", "Planning, Doing, Checking, Acting", "Orientierung, Konflikt, Lösung, Abschied", "Anfang, Mitte, Ende, Rückblick"], c: 0, e: "Später ergänzt: Adjourning (Auflösung)." },
-  { t: "Pädagogik", a: "II", q: "Sozialisation als „produktive Verarbeitung der inneren und äußeren Realität“ beschreibt …", o: ["Klaus Hurrelmann", "Sigmund Freud", "Kurt Lewin", "Carl Rogers"], c: 0, e: "Hurrelmann: Der Mensch ist aktiv, gestaltet seine Entwicklung mit – Wechselspiel von Anlage und Umwelt." },
-  { t: "Methoden", a: "II", q: "Was verlangt der Operator „erläutern“?", o: ["Sachverhalt nachvollziehbar darstellen und mit Beispielen veranschaulichen", "Begriffe ohne Erklärung aufzählen", "Ein eigenes, begründetes Urteil fällen", "Nur eine Definition wiedergeben"], c: 0, e: "„Erläutern“ = AFB II. Ohne Beispiel/Fallbezug gibt es Punktabzug. „Beurteilen“ wäre AFB III." },
-  { t: "Methoden", a: "III", q: "Welcher Operator gehört zum Anforderungsbereich III?", o: ["Beurteilen", "Nennen", "Beschreiben", "Erklären"], c: 0, e: "AFB III: beurteilen, bewerten, erörtern, Stellung nehmen – immer mit Kriterien, Pro/Contra und Fazit." }
+  // Englisch
+  { t: "Englisch", q: "If I ___ more time, I would learn Spanish.", o: ["had", "have", "would have", "will have"], e: "2nd conditional: if + simple past, would + infinitive. Unreal present situation." },
+  { t: "Englisch", q: "She ___ in Berlin since 2020.", o: ["has lived", "lives", "lived", "is living"], e: "„since/for“ + Zeitraum bis jetzt → present perfect (simple oder progressive), nie simple present." },
+  { t: "Englisch", q: "He said, \"I am tired.\" → Reported speech:", o: ["He said that he was tired.", "He said that he is tired.", "He said that I was tired.", "He said that he has been tired."], e: "Backshift: am → was, und das Pronomen passt sich an (I → he)." },
+  { t: "Englisch", q: "Passive: Somebody wrote the letter yesterday. → The letter ___ yesterday.", o: ["was written", "has written", "is written", "wrote"], e: "Simple past passive: was/were + past participle." },
+  { t: "Englisch", q: "What does „to become“ mean?", o: ["werden", "bekommen", "bequem sein", "beginnen"], e: "Klassischer false friend: become = werden, bekommen = to get/receive." },
+  { t: "Englisch", q: "Which is the correct English term for „Gesundheitswesen“?", o: ["healthcare system", "health being", "sickness office", "health wealth"], e: "healthcare system – nützlich für Texte zu Gesundheit & Soziales." },
+  // Mathematik
+  { t: "Mathematik", q: "Welche Steigung hat f(x) = 3x − 2?", o: ["3", "−2", "2", "−3"], e: "f(x) = mx + b: m ist die Steigung (3), b der y-Achsenabschnitt (−2)." },
+  { t: "Mathematik", q: "Wo liegt die Nullstelle von f(x) = 2x − 6?", o: ["x = 3", "x = −3", "x = 6", "x = −6"], e: "f(x) = 0 setzen: 2x − 6 = 0 → 2x = 6 → x = 3." },
+  { t: "Mathematik", q: "Lösungen von x² − 5x + 6 = 0?", o: ["x₁ = 2, x₂ = 3", "x₁ = −2, x₂ = −3", "x₁ = 1, x₂ = 6", "keine Lösung"], e: "pq-Formel mit p = −5, q = 6: x = 2,5 ± √(6,25 − 6) = 2,5 ± 0,5. Probe: 2·3 = 6 und 2 + 3 = 5 (Vieta)." },
+  { t: "Mathematik", q: "Scheitelpunkt von f(x) = (x − 2)² + 1?", o: ["S(2 | 1)", "S(−2 | 1)", "S(2 | −1)", "S(1 | 2)"], e: "Scheitelpunktform f(x) = (x − d)² + e → S(d | e). Vorzeichen in der Klammer umdrehen!" },
+  { t: "Mathematik", q: "Steigung der Geraden durch P(1 | 2) und Q(3 | 8)?", o: ["3", "6", "2", "1/3"], e: "m = (y₂ − y₁) / (x₂ − x₁) = (8 − 2) / (3 − 1) = 6 / 2 = 3." },
+  { t: "Mathematik", q: "Wie viel sind 20 % von 250?", o: ["50", "20", "25", "125"], e: "250 · 0,2 = 50. Prozentwert = Grundwert · Prozentsatz." },
+  // Biologie
+  { t: "Biologie", q: "Wie heißt das Modell, das den Aufbau der Zellmembran beschreibt?", o: ["Flüssig-Mosaik-Modell", "Schlüssel-Schloss-Modell", "Kugelwolkenmodell", "Sandwich-Modell"], e: "Singer & Nicolson (1972): Proteine schwimmen beweglich in einer flüssigen Lipid-Doppelschicht." },
+  { t: "Biologie", q: "Was bildet die Grundstruktur der Zellmembran?", o: ["Phospholipid-Doppelschicht", "Zellulose", "Eine einzelne Proteinschicht", "DNA-Stränge"], e: "Hydrophile Köpfe zeigen nach außen ins Wasser, hydrophobe Fettsäureschwänze nach innen." },
+  { t: "Biologie", q: "Welcher Teil eines Phospholipids ist hydrophob?", o: ["Die Fettsäureschwänze", "Der Phosphatkopf", "Das Glycerin allein", "Die Membranproteine"], e: "Kopf = hydrophil (wasserliebend), Schwänze = hydrophob (wassermeidend) → daher die Doppelschicht." },
+  { t: "Biologie", q: "Was ist Osmose?", o: ["Diffusion von Wasser durch eine selektiv permeable Membran", "Aktiver Transport von Zucker", "Zellteilung", "Aufnahme fester Partikel durch Einstülpung"], e: "Wasser wandert zur Seite der höheren Teilchenkonzentration, die gelösten Teilchen können die Membran nicht passieren." },
+  { t: "Biologie", q: "Was braucht aktiver Transport im Gegensatz zur Diffusion?", o: ["Energie (ATP)", "Ein Konzentrationsgefälle in Transportrichtung", "Licht", "Nichts – beide sind passiv"], e: "Aktiver Transport arbeitet gegen das Konzentrationsgefälle und verbraucht ATP, z. B. Natrium-Kalium-Pumpe." },
+  { t: "Biologie", q: "Welches Organell ist das „Kraftwerk der Zelle“?", o: ["Mitochondrium", "Ribosom", "Golgi-Apparat", "Zellkern"], e: "In den Mitochondrien läuft die Zellatmung, dabei entsteht ATP." },
+  // Recht
+  { t: "Recht", q: "Wann beginnt die Rechtsfähigkeit eines Menschen?", o: ["Mit Vollendung der Geburt (§ 1 BGB)", "Mit 7 Jahren", "Mit 18 Jahren", "Mit der Einschulung"], e: "§ 1 BGB: Rechtsfähig = Träger von Rechten und Pflichten. Gilt ab Geburt, z. B. kann ein Baby erben." },
+  { t: "Recht", q: "Wer ist nach § 104 BGB geschäftsunfähig?", o: ["Kinder unter 7 Jahren", "Alle unter 18 Jahren", "Jugendliche von 14 bis 17", "Nur Menschen ohne Einkommen"], e: "Willenserklärungen Geschäftsunfähiger sind nichtig (§ 105 BGB)." },
+  { t: "Recht", q: "Ein 16-Jähriger ist …", o: ["beschränkt geschäftsfähig", "geschäftsunfähig", "voll geschäftsfähig", "nicht rechtsfähig"], e: "§ 106 BGB: 7 bis unter 18 Jahre. Verträge brauchen grundsätzlich die Zustimmung der Eltern (§ 107 ff.)." },
+  { t: "Recht", q: "Welcher Paragraf ist der „Taschengeldparagraf“?", o: ["§ 110 BGB", "§ 104 BGB", "§ 433 BGB", "§ 1 BGB"], e: "Vertrag wirksam, wenn der Minderjährige ihn mit Mitteln bewirkt (bezahlt), die ihm dafür oder zur freien Verfügung überlassen wurden." },
+  { t: "Recht", q: "Wodurch kommt ein Kaufvertrag zustande?", o: ["Zwei übereinstimmende Willenserklärungen (Antrag und Annahme)", "Nur durch eine Unterschrift", "Durch Bezahlung allein", "Durch Eintrag ins Handelsregister"], e: "Antrag + Annahme = Vertrag. Pflichten aus § 433 BGB: Verkäufer übergibt, Käufer zahlt." },
+  { t: "Recht", q: "Ein Mietvertrag zwischen zwei Privatpersonen gehört zum …", o: ["Privatrecht", "Öffentlichen Recht", "Strafrecht", "Völkerrecht"], e: "Privatrecht: gleichgeordnete Parteien. Öffentliches Recht: Staat und Bürger im Über-/Unterordnungsverhältnis." },
+  // Sozialkunde
+  { t: "Sozialkunde", q: "Was steht in Art. 1 Abs. 1 Grundgesetz?", o: ["Die Würde des Menschen ist unantastbar.", "Alle Staatsgewalt geht vom Volke aus.", "Die Bundesrepublik ist ein Bundesstaat.", "Jeder hat das Recht auf Bildung."], e: "Art. 1 GG ist durch die Ewigkeitsklausel (Art. 79 Abs. 3 GG) vor Änderung geschützt." },
+  { t: "Sozialkunde", q: "Welche drei Gewalten unterscheidet die Gewaltenteilung?", o: ["Legislative, Exekutive, Judikative", "Bund, Länder, Gemeinden", "Bundestag, Bundesrat, Bundespräsident", "Parteien, Medien, Bürger"], e: "Gesetzgebung (Parlament), Ausführung (Regierung/Verwaltung), Rechtsprechung (Gerichte)." },
+  { t: "Sozialkunde", q: "Wer wählt den Bundeskanzler?", o: ["Der Bundestag", "Das Volk direkt", "Der Bundesrat", "Der Bundespräsident allein"], e: "Auf Vorschlag des Bundespräsidenten wählt der Bundestag (Art. 63 GG)." },
+  { t: "Sozialkunde", q: "Welche Wahlgrundsätze nennt Art. 38 GG?", o: ["allgemein, unmittelbar, frei, gleich, geheim", "öffentlich, direkt, fair, gleich, schnell", "allgemein, mittelbar, frei, offen, gleich", "freiwillig, geheim, digital, gleich, direkt"], e: "Merksatz: „AUFGG“ – allgemein, unmittelbar, frei, gleich, geheim." },
+  { t: "Sozialkunde", q: "Wen vertritt der Bundesrat?", o: ["Die Länder", "Die Parteien", "Die Gemeinden", "Die Gewerkschaften"], e: "Über den Bundesrat wirken die Länder bei der Gesetzgebung des Bundes mit (Föderalismus)." },
+  // Soziologie
+  { t: "Soziologie", q: "Was versteht man unter Sozialisation?", o: ["Prozess, in dem der Mensch Werte, Normen und Verhalten seiner Gesellschaft erlernt", "Verstaatlichung von Unternehmen", "Ein Verfahren der Sozialversicherung", "Freundschaften im Internet"], e: "Sozialisation läuft ein Leben lang – in Familie, Schule, Peergroup, Medien, Beruf." },
+  { t: "Soziologie", q: "Welche Instanz gilt als primäre Sozialisationsinstanz?", o: ["Familie", "Schule", "Betrieb", "Medien"], e: "Primär: Familie. Sekundär: z. B. Schule, Kita, Ausbildung. Peergroup und Medien werden oft zusätzlich genannt." },
+  { t: "Soziologie", q: "„Pünktlich zur Arbeit erscheinen“ ist eher …", o: ["eine Norm", "ein Wert", "eine Rolle", "ein Status"], e: "Werte = allgemeine Vorstellungen des Wünschenswerten (z. B. Zuverlässigkeit). Normen = konkrete Verhaltensregeln daraus." },
+  { t: "Soziologie", q: "Was ist eine soziale Rolle?", o: ["Bündel von Verhaltenserwartungen an den Inhaber einer Position", "Die Persönlichkeit eines Menschen", "Ein Theaterstück über Gesellschaft", "Ein Gesetz"], e: "Beispiel: Von einer Praktikantin in der Praxis wird Pünktlichkeit, Diskretion und Hygiene erwartet." },
+  { t: "Soziologie", q: "Sie sollen gleichzeitig für die Klausur lernen und Überstunden in der Praxis machen. Das ist ein …", o: ["Interrollenkonflikt", "Intrarollenkonflikt", "Wertewandel", "Statusverlust"], e: "Inter = zwischen verschiedenen Rollen einer Person (Schüler vs. Praktikant). Intra = widersprüchliche Erwartungen innerhalb einer Rolle." },
+  { t: "Soziologie", q: "Wie nennt man Reaktionen auf normgerechtes oder abweichendes Verhalten?", o: ["Sanktionen", "Sozialisation", "Rollen", "Institutionen"], e: "Positive Sanktionen (Lob, Belohnung) und negative (Tadel, Strafe) sichern die Einhaltung von Normen." },
+  // Deutsch
+  { t: "Deutsch", q: "„Er hat ein Herz aus Stein.“ – Welches Stilmittel?", o: ["Metapher", "Vergleich", "Anapher", "Alliteration"], e: "Metapher = bildlicher Ausdruck ohne „wie“. Mit „wie“ (hart wie Stein) wäre es ein Vergleich." },
+  { t: "Deutsch", q: "Wie heißt die Wiederholung eines Wortes am Anfang aufeinanderfolgender Sätze oder Verse?", o: ["Anapher", "Epipher", "Ellipse", "Hyperbel"], e: "Anapher = vorne. Epipher = Wiederholung am Ende. Wirkung: Eindringlichkeit, Betonung." },
+  { t: "Deutsch", q: "Was gehört in die Einleitung einer Textanalyse?", o: ["Autor, Titel, Textsorte, Erscheinungsjahr, Thema", "Die eigene Meinung zum Text", "Alle Stilmittel mit Zeilenangaben", "Ein Zitat als Abschluss"], e: "Der „TATTE-Satz“: Titel, Autor, Textsorte, Thema, Erscheinungsjahr – die eigene Wertung kommt erst am Schluss." },
+  { t: "Deutsch", q: "Indirekte Rede korrekt im Konjunktiv I:", o: ["Er sagt, er sei krank.", "Er sagt, er ist krank.", "Er sagt, er wäre krank gewesen sein.", "Er sagt, er würde krank."], e: "Konjunktiv I für die Redewiedergabe (sei, habe, komme). Konjunktiv II nur als Ersatz, wenn Konj. I = Indikativ." },
+  { t: "Deutsch", q: "Welcher Satz ist richtig?", o: ["Ich glaube, dass er morgen kommt.", "Ich glaube dass, er morgen kommt.", "Ich glaube dass er morgen, kommt.", "Ich, glaube dass er morgen kommt."], e: "Vor der Konjunktion „dass“ steht ein Komma: Hauptsatz, Nebensatz." },
+  // Digitalisierung
+  { t: "Digitalisierung", q: "Wofür steht DSGVO?", o: ["Datenschutz-Grundverordnung", "Digitale Sicherheits-Grundordnung", "Deutsches Software-Gesetz", "Datenspeicher-Grundvertrag"], e: "EU-Verordnung, gilt seit dem 25.05.2018. In der Zahnarztpraxis besonders relevant: Gesundheitsdaten sind besonders geschützt." },
+  { t: "Digitalisierung", q: "Was ist Phishing?", o: ["Erschleichen von Zugangsdaten über gefälschte Mails oder Websites", "Ein Programm zum Komprimieren", "Ein Netzwerkkabel", "Eine Art Virenscanner"], e: "Warnzeichen: Druck („sofort handeln“), falsche Absenderadresse, Links zu fremden Domains." },
+  { t: "Digitalisierung", q: "Wie viele Bit hat ein Byte?", o: ["8", "2", "10", "16"], e: "1 Byte = 8 Bit → 2⁸ = 256 mögliche Werte." },
+  { t: "Digitalisierung", q: "Was ist Zwei-Faktor-Authentifizierung?", o: ["Anmeldung mit zwei unterschiedlichen Nachweisen, z. B. Passwort + Code", "Zwei Passwörter hintereinander", "Anmelden auf zwei Geräten", "Ein doppelt so langes Passwort"], e: "Faktoren aus verschiedenen Kategorien: Wissen (Passwort), Besitz (Handy), Biometrie (Fingerabdruck)." }
 ];
-
 const TERMS = [
-  ["Ressourcen", "Innere (z. B. Selbstwirksamkeit, Wissen) und äußere (z. B. soziale Unterstützung, Geld) Kräfte, die helfen, Belastungen zu bewältigen und Gesundheit zu erhalten."],
-  ["Setting-Ansatz", "Gesundheitsförderung in Lebenswelten wie Schule, Betrieb oder Kita, indem dort Strukturen und Verhalten gemeinsam verändert werden."],
-  ["Empowerment", "Befähigung von Menschen, ihre Lebensumstände und Gesundheit selbstbestimmt zu gestalten – zentrales Prinzip der Ottawa-Charta."],
-  ["Coping", "Alle Bemühungen, mit Stress umzugehen: problemorientiert (Ursache angehen) oder emotionsorientiert (Gefühle regulieren)."],
-  ["Resilienz", "Psychische Widerstandsfähigkeit: trotz Belastungen und Krisen gesund zu bleiben bzw. sich zu erholen."],
-  ["Selbstwirksamkeit", "Überzeugung, schwierige Situationen aus eigener Kraft bewältigen zu können (Bandura)."],
-  ["Komorbidität", "Gleichzeitiges Auftreten mehrerer Erkrankungen bei einer Person, z. B. Adipositas und Diabetes Typ 2."],
-  ["Partizipation", "Beteiligung der Betroffenen an Entscheidungen und Maßnahmen – erhöht Akzeptanz und Wirksamkeit."],
-  ["Kongruenz", "Echtheit nach Rogers: Inneres Erleben und äußeres Verhalten stimmen überein – eine der drei Grundhaltungen."],
-  ["Inklusion", "Alle Menschen nehmen von Anfang an gleichberechtigt teil; nicht der Mensch passt sich an, sondern das System."]
+  ["Soziologie", "Peergroup", "Gruppe Gleichaltriger mit ähnlichen Interessen; wichtige Sozialisationsinstanz im Jugendalter."],
+  ["Sozialkunde", "Föderalismus", "Aufteilung der Staatsgewalt zwischen Bund und Ländern; die Länder wirken über den Bundesrat mit."],
+  ["Biologie", "Semipermeabilität", "Eigenschaft einer Membran, nur bestimmte Teilchen (z. B. Wasser) durchzulassen, andere nicht."],
+  ["Recht", "Willenserklärung", "Äußerung eines Willens, die auf eine Rechtsfolge gerichtet ist, z. B. ein Angebot zum Kauf."],
+  ["Deutsch", "These", "Behauptung, die in einer Argumentation durch Argumente und Beispiele gestützt wird."],
+  ["Mathematik", "Funktion", "Zuordnung, die jedem x-Wert genau einen y-Wert zuordnet."],
+  ["Englisch", "Linking words", "Konnektoren wie however, therefore, furthermore – sie strukturieren jeden Text und bringen Punkte."],
+  ["Digitalisierung", "Algorithmus", "Eindeutige, endliche Folge von Anweisungen zur Lösung eines Problems."],
+  ["Soziologie", "Sozialer Wandel", "Veränderung gesellschaftlicher Strukturen, Werte und Normen über die Zeit, z. B. durch Digitalisierung."],
+  ["Recht", "Schweigepflicht", "Pflicht, Patientendaten nicht weiterzugeben; gilt auch für Praktikanten in der Praxis (§ 203 StGB)."],
+  ["Biologie", "Diffusion", "Teilchenbewegung vom Ort höherer zum Ort niedrigerer Konzentration, ohne Energieaufwand."],
+  ["Sozialkunde", "Volkssouveränität", "Alle Staatsgewalt geht vom Volke aus (Art. 20 Abs. 2 GG) – über Wahlen und Abstimmungen."]
 ];
+const SUBJECTS = ["Englisch", "Mathematik", "Biologie", "Recht", "Sozialkunde", "Soziologie", "Deutsch", "Digitalisierung"];
 
-/* ---------- Zustand ---------- */
-const st = store.get("stats", { total: 0, right: 0, streak: 0, best: 0, topics: {} });
-let current = null, answered = false;
-
-/* ---------- Jarvis-Stimme ---------- */
-const lines = {
-  right: ["Korrekt, Sir. Ich bin beinahe beeindruckt.", "Richtig. Notieren Sie sich das Gefühl, es steht Ihnen.", "Volltreffer. Die 1,0 rückt näher.", "Präzise. So hätte ich es auch formuliert.", "Richtig. Ich streiche meine vorbereitete Belehrung."],
-  wrong: ["Knapp daneben ist auch vorbei, Sir.", "Interessante Theorie. Leider falsch.", "Das war nichts. Lesen Sie die Erklärung – ich warte.", "Falsch, aber mutig. Mut gibt nur keine Notenpunkte.", "Nein. Aber genau dafür üben wir ja."],
-  streak: ["Fünf in Folge. Soll ich die Lehrerin vorwarnen?", "Zehn richtige am Stück. Ich muss meine Erwartungen nach oben korrigieren."]
-};
+/* ================= Hilfen ================= */
+const today0 = () => { const n = new Date(); n.setHours(0, 0, 0, 0); return n; };
+const dDays = s => Math.round((new Date(s + "T00:00:00") - today0()) / 864e5);
+const isoOf = d => d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+const fmtD = s => new Date(s + "T00:00:00").toLocaleDateString("de-DE", { weekday: "short", day: "2-digit", month: "2-digit" });
 const pick = a => a[Math.floor(Math.random() * a.length)];
-function say(text) {
-  document.getElementById("jline").textContent = text;
-  if (!document.getElementById("voice").checked || !("speechSynthesis" in window)) return;
+const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const own = store.get("own", []);
+const allExams = () => EXAMS.concat(own).filter(e => dDays(e.date) >= 0).sort((a, b) => (a.date + (a.s || "")).localeCompare(b.date + (b.s || "")));
+const ferienToday = () => { const t = isoOf(new Date()); return FERIEN.find(f => t >= f[1] && t <= f[2]); };
+
+/* ================= Stimme & Schreibmaschine ================= */
+let typeTimer = null;
+function say(text, speak = true) {
+  const el = $("jline");
+  clearInterval(typeTimer);
+  if (still) { el.textContent = text; } else {
+    let i = 0; el.textContent = "";
+    const cur = document.createElement("span"); cur.className = "cur";
+    typeTimer = setInterval(() => { el.textContent = text.slice(0, ++i); el.appendChild(cur); if (i >= text.length) clearInterval(typeTimer); }, 18);
+  }
+  if (!speak || !$("voice").checked || !("speechSynthesis" in window)) return;
   try {
     speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(text);
-    u.lang = "de-DE"; u.rate = 1.02; u.pitch = 0.9;
-    const v = speechSynthesis.getVoices().find(v => v.lang && v.lang.startsWith("de"));
-    if (v) u.voice = v;
+    const u = new SpeechSynthesisUtterance(text); u.lang = "de-DE"; u.rate = 1.03; u.pitch = 0.85;
+    const v = speechSynthesis.getVoices().find(v => v.lang && v.lang.startsWith("de")); if (v) u.voice = v;
     speechSynthesis.speak(u);
   } catch {}
 }
+const LINES = {
+  right: ["Korrekt, Sir. Ich bin beinahe beeindruckt.", "Richtig. Notieren Sie sich das Gefühl, es steht Ihnen.", "Volltreffer. Die 1,0 rückt näher.", "Präzise. So hätte ich es auch formuliert.", "Richtig. Ich streiche meine vorbereitete Belehrung."],
+  wrong: ["Knapp daneben ist auch vorbei, Sir.", "Interessante Theorie. Leider falsch.", "Das war nichts. Lesen Sie die Erklärung – ich warte.", "Falsch, aber mutig. Mut gibt nur keine Notenpunkte.", "Nein. Aber genau dafür üben wir ja."]
+};
 
-/* ---------- Quiz ---------- */
-const topics = [...new Set(Q.map(q => q.t))];
-const filterEl = document.getElementById("filter");
-topics.forEach(t => { const o = document.createElement("option"); o.value = t; o.textContent = t; filterEl.appendChild(o); });
+/* ================= Quiz ================= */
+const st = store.get("stats", { total: 0, right: 0, streak: 0, best: 0, topics: {} });
+let current = null, answered = false;
+SUBJECTS.forEach(t => { const o = document.createElement("option"); o.value = t; o.textContent = t; $("filter").appendChild(o); });
 
-function shuffle(a) { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
-
+function pool() {
+  const f = $("filter").value;
+  if (f === "alle") return Q;
+  if (f !== "klausur") return Q.filter(q => q.t === f);
+  const next = [...new Set(allExams().slice(0, 3).map(e => e.fach))];
+  const p = Q.filter(q => next.includes(q.t));
+  return p.length ? p.concat(p, Q) : Q; // Klausurfächer doppelt gewichtet
+}
 function nextQuestion() {
-  const pool = Q.filter(q => filterEl.value === "alle" || q.t === filterEl.value);
-  let q; do { q = pick(pool); } while (pool.length > 1 && q === current);
+  const p = pool();
+  let q; do { q = pick(p); } while (Q.length > 1 && q === current);
   current = q; answered = false;
-  document.getElementById("q-topic").textContent = q.t;
-  document.getElementById("q-afb").textContent = "AFB " + q.a;
-  document.getElementById("q-text").textContent = q.q;
-  document.getElementById("q-count").textContent = pool.length + " Fragen im Pool";
-  const ex = document.getElementById("explain"); ex.hidden = true; ex.textContent = "";
-  const box = document.getElementById("answers"); box.innerHTML = "";
-  shuffle(q.o.map((text, i) => ({ text, ok: i === q.c }))).forEach((opt, i) => {
+  $("q-topic").textContent = q.t;
+  const ex = allExams().find(e => e.fach === q.t);
+  const qe = $("q-ex");
+  if (ex && dDays(ex.date) <= 21) { qe.hidden = false; qe.textContent = "KLAUSUR IN " + dDays(ex.date) + (dDays(ex.date) === 1 ? " TAG" : " TAGEN"); } else qe.hidden = true;
+  $("q-text").textContent = q.q;
+  $("q-count").textContent = new Set(p).size + " Fragen im Pool";
+  $("explain").hidden = true;
+  const box = $("answers"); box.innerHTML = "";
+  shuffle(q.o.map((text, i) => ({ text, ok: i === 0 }))).forEach((opt, i) => {
     const b = document.createElement("button");
     b.type = "button"; b.className = "ans"; b.dataset.ok = opt.ok ? "1" : "0";
-    b.innerHTML = `<span class="key">${"ABCD"[i]}</span><span></span>`;
+    b.innerHTML = '<span class="key">' + "ABCD"[i] + "</span><span></span>";
     b.lastChild.textContent = opt.text;
     b.addEventListener("click", () => answer(b));
     box.appendChild(b);
   });
+  const qb = $("qbox"); qb.classList.remove("q-anim"); void qb.offsetWidth; qb.classList.add("q-anim");
 }
-
 function answer(btn) {
   if (answered) return; answered = true;
   const ok = btn.dataset.ok === "1";
@@ -371,166 +516,254 @@ function answer(btn) {
   st.total++; tp.total++;
   if (ok) { st.right++; tp.right++; st.streak++; st.best = Math.max(st.best, st.streak); } else st.streak = 0;
   store.set("stats", st);
-  const ex = document.getElementById("explain"); ex.textContent = current.e; ex.hidden = false;
-  say(ok ? (st.streak === 5 ? lines.streak[0] : st.streak === 10 ? lines.streak[1] : pick(lines.right)) : pick(lines.wrong));
+  $("explain").textContent = current.e; $("explain").hidden = false;
+  let line = ok ? pick(LINES.right) : pick(LINES.wrong);
+  if (ok && st.streak === 5) line = "Fünf in Folge. Soll ich die Lehrkraft vorwarnen?";
+  if (ok && st.streak === 10) line = "Zehn am Stück. Ich muss meine Erwartungen nach oben korrigieren, Sir.";
+  say(line);
+  const r = btn.getBoundingClientRect();
+  if (ok) burst(r.left + r.width / 2, r.top + r.height / 2, st.streak >= 5 ? 90 : 45);
   render();
 }
 
-/* ---------- Auswertung ---------- */
+/* ================= Auswertung ================= */
 function points(pct) {
   const t = [[95,15],[90,14],[85,13],[80,12],[75,11],[70,10],[65,9],[60,8],[55,7],[50,6],[45,5],[40,4],[33,3],[27,2],[20,1]];
   for (const [p, n] of t) if (pct >= p) return n; return 0;
 }
+function countTo(el, to, suffix = "") {
+  const from = parseInt(el.textContent) || 0;
+  if (still || from === to) { el.textContent = to + suffix; return; }
+  const t0 = performance.now();
+  const step = now => { const k = Math.min(1, (now - t0) / 600); el.textContent = Math.round(from + (to - from) * (1 - Math.pow(1 - k, 3))) + suffix; if (k < 1) requestAnimationFrame(step); };
+  requestAnimationFrame(step);
+}
+let targetPct = 0;
 function render() {
   const pct = st.total ? Math.round(st.right / st.total * 100) : 0;
-  document.getElementById("core-pct").textContent = pct + "%";
-  document.getElementById("core-np").textContent = st.total ? points(pct) + " NOTENPUNKTE (≈)" : "– NOTENPUNKTE";
-  document.getElementById("s-total").textContent = st.total;
-  document.getElementById("s-streak").textContent = st.streak;
-  document.getElementById("s-best").textContent = st.best;
-  const bars = document.getElementById("bars"); bars.innerHTML = "";
-  topics.forEach(t => {
+  countTo($("core-pct"), pct, "%");
+  $("core-np").textContent = st.total ? "≈ " + points(pct) + " NOTENPUNKTE" : "– NOTENPUNKTE";
+  countTo($("s-total"), st.total); countTo($("s-streak"), st.streak); countTo($("s-best"), st.best);
+  $("streak-box").classList.toggle("hot", st.streak >= 3);
+  const bars = $("bars"); bars.innerHTML = "";
+  SUBJECTS.forEach(t => {
     const d = st.topics[t] || { total: 0, right: 0 };
     const p = d.total ? Math.round(d.right / d.total * 100) : 0;
     const row = document.createElement("div"); row.className = "bar-row";
-    row.innerHTML = `<span></span><div class="bar"><i style="width:${p}%"></i></div><span class="p">${d.total ? p + "%" : "–"}</span>`;
+    row.innerHTML = '<span></span><div class="bar"><i></i></div><span class="p">' + (d.total ? p + "%" : "–") + "</span>";
     row.firstChild.textContent = t;
     bars.appendChild(row);
+    requestAnimationFrame(() => requestAnimationFrame(() => { row.querySelector("i").style.width = p + "%"; }));
   });
   targetPct = pct / 100;
 }
 
-/* ---------- Reaktor-Animation ---------- */
-const cv = document.getElementById("core"), cx = cv.getContext("2d");
-const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
-let targetPct = 0, shownPct = 0, rot = 0;
-function draw() {
+/* ================= Reaktor ================= */
+const cv = $("core"), cx = cv.getContext("2d");
+let shown = 0, rot = 0, pulse = 0;
+function drawCore() {
   const W = cv.width, c = W / 2;
   cx.clearRect(0, 0, W, W);
-  shownPct += (targetPct - shownPct) * 0.06;
-  // Ticks
+  shown += (targetPct - shown) * 0.05; pulse += 0.04;
   cx.save(); cx.translate(c, c); cx.rotate(rot * 0.2);
-  for (let i = 0; i < 72; i++) {
-    cx.rotate(Math.PI * 2 / 72);
-    cx.strokeStyle = i % 6 === 0 ? "rgba(98,214,255,0.7)" : "rgba(98,214,255,0.25)";
-    cx.lineWidth = 2; cx.beginPath(); cx.moveTo(0, -226); cx.lineTo(0, i % 6 === 0 ? -208 : -216); cx.stroke();
-  }
+  for (let i = 0; i < 72; i++) { cx.rotate(Math.PI / 36); cx.strokeStyle = i % 6 === 0 ? "rgba(98,214,255,0.75)" : "rgba(98,214,255,0.22)"; cx.lineWidth = 2; cx.beginPath(); cx.moveTo(0, -228); cx.lineTo(0, i % 6 === 0 ? -208 : -217); cx.stroke(); }
   cx.restore();
-  // Rotierende Segmente
-  const seg = (r, w, n, speed, color, gap) => {
-    cx.save(); cx.translate(c, c); cx.rotate(rot * speed);
-    cx.strokeStyle = color; cx.lineWidth = w;
-    for (let i = 0; i < n; i++) { const a = i * Math.PI * 2 / n; cx.beginPath(); cx.arc(0, 0, r, a, a + Math.PI * 2 / n - gap); cx.stroke(); }
-    cx.restore();
-  };
+  const seg = (r, w, n, sp, col, gap) => { cx.save(); cx.translate(c, c); cx.rotate(rot * sp); cx.strokeStyle = col; cx.lineWidth = w; for (let i = 0; i < n; i++) { const a = i * Math.PI * 2 / n; cx.beginPath(); cx.arc(0, 0, r, a, a + Math.PI * 2 / n - gap); cx.stroke(); } cx.restore(); };
   seg(196, 3, 3, 0.6, "rgba(98,214,255,0.55)", 0.5);
-  seg(120, 2, 8, -0.9, "rgba(98,214,255,0.35)", 0.25);
-  seg(100, 6, 12, 0.4, "rgba(255,181,71,0.25)", 0.18);
-  // Fortschrittsring
-  cx.lineCap = "round";
-  cx.strokeStyle = "rgba(98,214,255,0.12)"; cx.lineWidth = 14;
-  cx.beginPath(); cx.arc(c, c, 162, 0, Math.PI * 2); cx.stroke();
+  seg(126, 2, 8, -0.9, "rgba(98,214,255,0.35)", 0.25);
+  seg(104, 6, 12, 0.4, "rgba(255,181,71,0.28)", 0.18);
+  cx.lineCap = "round"; cx.strokeStyle = "rgba(98,214,255,0.12)"; cx.lineWidth = 14;
+  cx.beginPath(); cx.arc(c, c, 164, 0, Math.PI * 2); cx.stroke();
   const g = cx.createLinearGradient(0, 0, W, W); g.addColorStop(0, "#62d6ff"); g.addColorStop(1, "#ffb547");
-  cx.strokeStyle = g; cx.lineWidth = 14; cx.shadowColor = "#62d6ff"; cx.shadowBlur = 18;
-  cx.beginPath(); cx.arc(c, c, 162, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * Math.max(shownPct, 0.002)); cx.stroke();
+  const end = -Math.PI / 2 + Math.PI * 2 * Math.max(shown, 0.003);
+  cx.strokeStyle = g; cx.shadowColor = "#62d6ff"; cx.shadowBlur = 20;
+  cx.beginPath(); cx.arc(c, c, 164, -Math.PI / 2, end); cx.stroke();
+  cx.fillStyle = "#fff"; cx.beginPath(); cx.arc(c + Math.cos(end) * 164, c + Math.sin(end) * 164, 5, 0, Math.PI * 2); cx.fill();
   cx.shadowBlur = 0; cx.lineCap = "butt";
-  // Kernglühen
-  const rg = cx.createRadialGradient(c, c, 0, c, c, 90); rg.addColorStop(0, "rgba(98,214,255,0.22)"); rg.addColorStop(1, "rgba(98,214,255,0)");
-  cx.fillStyle = rg; cx.beginPath(); cx.arc(c, c, 90, 0, Math.PI * 2); cx.fill();
+  const pr = 86 + Math.sin(pulse) * 6;
+  const rg = cx.createRadialGradient(c, c, 0, c, c, pr); rg.addColorStop(0, "rgba(98,214,255,0.28)"); rg.addColorStop(1, "rgba(98,214,255,0)");
+  cx.fillStyle = rg; cx.beginPath(); cx.arc(c, c, pr, 0, Math.PI * 2); cx.fill();
   if (!still) rot += 0.012;
-  requestAnimationFrame(draw);
 }
 
-/* ---------- Klausuren ---------- */
-function iso(offset) { const d = new Date(); d.setDate(d.getDate() + offset); return d.toISOString().slice(0, 10); }
-let exams = store.get("exams", null);
-if (!exams) exams = [
-  { fach: "Gesundheit", thema: "Prävention & Salutogenese", date: iso(9), ex: true },
-  { fach: "Psychologie", thema: "Lerntheorien", date: iso(23), ex: true }
-];
-function daysUntil(s) { const t = new Date(s + "T00:00:00"), n = new Date(); n.setHours(0,0,0,0); return Math.round((t - n) / 864e5); }
-function renderExams() {
-  exams = exams.filter(e => daysUntil(e.date) >= 0).sort((a, b) => a.date.localeCompare(b.date));
-  store.set("exams", exams);
-  const ul = document.getElementById("exams"); ul.innerHTML = "";
-  if (!exams.length) { ul.innerHTML = '<li class="core-note">Keine Klausuren eingetragen. Verdächtig ruhig, Sir.</li>'; }
-  exams.forEach((e, i) => {
-    const d = daysUntil(e.date);
+/* ================= Hintergrund-Partikel ================= */
+const bg = $("bgfx"), bx = bg.getContext("2d");
+let pts = [];
+function sizeBg() {
+  const d = Math.min(devicePixelRatio || 1, 2);
+  bg.width = innerWidth * d; bg.height = innerHeight * d; bx.setTransform(d, 0, 0, d, 0, 0);
+  fxc.width = innerWidth * d; fxc.height = innerHeight * d; fx.setTransform(d, 0, 0, d, 0, 0);
+  const n = Math.min(70, Math.floor(innerWidth * innerHeight / 22000));
+  pts = Array.from({ length: n }, () => ({ x: Math.random() * innerWidth, y: Math.random() * innerHeight, vx: (Math.random() - .5) * .25, vy: (Math.random() - .5) * .25 }));
+}
+function drawBg() {
+  bx.clearRect(0, 0, innerWidth, innerHeight);
+  for (const p of pts) { p.x += p.vx; p.y += p.vy; if (p.x < 0 || p.x > innerWidth) p.vx *= -1; if (p.y < 0 || p.y > innerHeight) p.vy *= -1; }
+  for (let i = 0; i < pts.length; i++) {
+    const a = pts[i];
+    bx.fillStyle = "rgba(98,214,255,0.5)"; bx.fillRect(a.x - 1, a.y - 1, 2, 2);
+    for (let j = i + 1; j < pts.length; j++) {
+      const b = pts[j], dx = a.x - b.x, dy = a.y - b.y, d2 = dx * dx + dy * dy;
+      if (d2 < 15000) { bx.strokeStyle = "rgba(98,214,255," + (0.12 * (1 - d2 / 15000)) + ")"; bx.beginPath(); bx.moveTo(a.x, a.y); bx.lineTo(b.x, b.y); bx.stroke(); }
+    }
+  }
+}
+
+/* ================= Erfolgs-Funken ================= */
+const fxc = $("fx"), fx = fxc.getContext("2d");
+let sparks = [];
+function burst(x, y, n) {
+  if (still) return;
+  for (let i = 0; i < n; i++) { const a = Math.random() * Math.PI * 2, s = 2 + Math.random() * 6; sparks.push({ x, y, vx: Math.cos(a) * s, vy: Math.sin(a) * s - 2, life: 1, c: Math.random() < .5 ? "98,214,255" : (Math.random() < .5 ? "255,181,71" : "77,227,165") }); }
+}
+function drawFx() {
+  fx.clearRect(0, 0, innerWidth, innerHeight);
+  sparks = sparks.filter(s => s.life > 0);
+  for (const s of sparks) { s.x += s.vx; s.y += s.vy; s.vy += 0.18; s.vx *= 0.98; s.life -= 0.02; fx.fillStyle = "rgba(" + s.c + "," + s.life + ")"; fx.fillRect(s.x, s.y, 3, 3); }
+}
+
+function loop() { drawCore(); if (!still) { drawBg(); drawFx(); } requestAnimationFrame(loop); }
+
+/* ================= Heute ================= */
+function renderDay() {
+  const now = new Date(), wd = now.getDay(), fer = ferienToday();
+  const hm = now.getHours() * 60 + now.getMinutes();
+  const toM = s => { const [h, m] = s.split(":").map(Number); return h * 60 + m; };
+  const plan = fer ? { head: fer[0], items: [["10:00", "11:15", "Ferien-Lernblock (75 min) – oder frei, je nach Plan"]] } : WEEK[wd];
+  $("day-title").innerHTML = "Heute <small></small>"; $("day-title").lastChild.textContent = plan.head;
+  const examsToday = allExams().filter(e => dDays(e.date) === 0);
+  const ul = $("day"); ul.innerHTML = "";
+  plan.items.forEach(([s, e, t]) => {
     const li = document.createElement("li");
-    li.className = "exam" + (d <= 3 ? " now" : d <= 10 ? " soon" : "");
-    li.innerHTML = `<div class="days">${d}<small>${d === 1 ? "TAG" : "TAGE"}</small></div><div class="what"><b></b><span class="sub"></span></div><button class="x" type="button" aria-label="Klausur entfernen">×</button>`;
-    li.querySelector("b").textContent = e.fach;
-    if (e.ex) { const tag = document.createElement("span"); tag.className = "example-tag"; tag.textContent = "BEISPIEL"; li.querySelector("b").appendChild(tag); }
-    li.querySelector(".sub").textContent = (e.thema ? e.thema + " · " : "") + new Date(e.date + "T00:00:00").toLocaleDateString("de-DE", { weekday: "short", day: "2-digit", month: "2-digit" });
-    li.querySelector(".x").addEventListener("click", () => { exams.splice(i, 1); renderExams(); });
+    const past = e && hm >= toM(e), nowOn = hm >= toM(s) && (!e || hm < toM(e));
+    if (past) li.classList.add("past"); if (nowOn) li.classList.add("now");
+    const ex = examsToday.find(x => x.s === s && x.fach === t);
+    if (ex) li.classList.add("exam");
+    li.innerHTML = '<span class="tm">' + s + (e ? "–" + e : "") + "</span><b></b>";
+    li.lastChild.textContent = t;
+    if (ex) { const p = document.createElement("span"); p.className = "pill"; p.textContent = "KLAUSUR"; li.lastChild.appendChild(p); }
+    if (nowOn) { const p = document.createElement("span"); p.className = "pill"; p.textContent = "JETZT"; p.style.color = "var(--amber)"; li.lastChild.appendChild(p); }
     ul.appendChild(li);
   });
-  const s = document.getElementById("status-exam");
-  if (exams.length) { const d = daysUntil(exams[0].date); s.innerHTML = `NÄCHSTE KLAUSUR: <span class="warn"></span>`; s.firstElementChild.textContent = `${exams[0].fach.toUpperCase()} IN ${d} ${d === 1 ? "TAG" : "TAGEN"}`; }
-  else s.textContent = "NÄCHSTE KLAUSUR: –";
 }
-document.getElementById("add").addEventListener("submit", ev => {
+
+/* ================= Klausuren ================= */
+function renderExams() {
+  const ul = $("exams"); ul.innerHTML = "";
+  allExams().slice(0, 6).forEach(e => {
+    const d = dDays(e.date);
+    const li = document.createElement("li");
+    li.className = "exam" + (d <= 3 ? " now" : d <= 7 ? " soon" : "");
+    li.innerHTML = '<div class="days">' + d + "<small>" + (d === 1 ? "TAG" : "TAGE") + '</small></div><div class="what"><b></b><span class="sub"></span></div><button class="x" type="button" aria-label="Eigene Klausur entfernen">×</button>';
+    li.querySelector("b").textContent = e.fach;
+    li.querySelector(".sub").textContent = [e.thema, fmtD(e.date), e.std || e.s].filter(Boolean).join(" · ");
+    const x = li.querySelector(".x");
+    if (!e.own) x.hidden = true; else x.addEventListener("click", () => { own.splice(own.indexOf(e), 1); store.set("own", own); renderExams(); renderAlert(); });
+    ul.appendChild(li);
+  });
+  const ev = $("events"); ev.innerHTML = "";
+  EVENTS.filter(([d]) => dDays(d) >= 0).slice(0, 3).forEach(([d, t]) => {
+    const div = document.createElement("div"); div.className = "event";
+    div.innerHTML = "<span>" + new Date(d + "T00:00:00").toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit" }) + "</span><span></span>";
+    div.lastChild.textContent = t; ev.appendChild(div);
+  });
+}
+$("add").addEventListener("submit", ev => {
   ev.preventDefault();
-  const fach = document.getElementById("f-fach").value.trim(), date = document.getElementById("f-date").value, thema = document.getElementById("f-thema").value.trim();
+  const fach = $("f-fach").value.trim(), date = $("f-date").value, thema = $("f-thema").value.trim();
   if (!fach || !date) return;
-  if (daysUntil(date) < 0) { say("Diese Klausur liegt in der Vergangenheit, Sir. Selbst ich kann die Zeit nicht zurückdrehen."); return; }
-  exams = exams.filter(e => !e.ex);
-  exams.push({ fach, thema, date });
-  ev.target.reset(); renderExams();
-  const d = daysUntil(date);
-  say(d <= 3 ? `Eingetragen. ${d} Tage? Dann sollten wir sofort anfangen, Sir.` : `Eingetragen. ${d} Tage bis ${fach}. Genug Zeit – wenn wir sie nutzen.`);
+  if (dDays(date) < 0) { say("Diese Klausur liegt in der Vergangenheit, Sir. Selbst ich kann die Zeit nicht zurückdrehen."); return; }
+  own.push({ fach, thema, date, own: true }); store.set("own", own);
+  ev.target.reset(); renderExams(); renderAlert();
+  say("Eingetragen. " + dDays(date) + " Tage bis " + fach + ". Genug Zeit – wenn wir sie nutzen.");
 });
 
-/* ---------- Fokus-Timer ---------- */
-let tLeft = 25 * 60, tTotal = 25 * 60, tRun = null, tPhase = "work";
-let tDone = store.get("done", { day: "", n: 0 }); if (tDone.day !== iso(0)) tDone = { day: iso(0), n: 0 };
+/* ================= Klausurmodus-Band ================= */
+let nextExam = null;
+function phaseTip(d) {
+  if (d === 0) return "<b>Klausurtag.</b> Normal frühstücken, 10 Minuten Karten in der Bahn, keine Panik-Lektüre auf dem Flur.";
+  if (d === 1) return "<b>Vorabend:</b> Nur Karten und Fehlerheft, nichts Neues. Tasche packen, Licht aus um 22:45.";
+  if (d <= 4) return "<b>4 bis 2 Tage vorher:</b> Aufgaben im Klausurformat mit Uhr, rote Themen zuerst.";
+  if (d <= 7) return "<b>7 bis 5 Tage vorher:</b> Themenliste klären, alles einmal aus dem Kopf aufschreiben, Lücken rot markieren.";
+  return "<b>Noch Zeit:</b> Jede Woche kurz wiederholen, Karten schreiben. Klausurmodus startet 7 Tage vorher.";
+}
+function renderAlert() {
+  nextExam = allExams()[0];
+  if (!nextExam) { $("alert").hidden = true; return; }
+  const d = dDays(nextExam.date);
+  $("alert-lbl").firstChild.textContent = d <= 7 ? "KLAUSURMODUS" : "NÄCHSTE KLAUSUR";
+  $("alert-lbl").lastChild.textContent = nextExam.fach + " · " + fmtD(nextExam.date);
+  $("alert-tip").innerHTML = phaseTip(d);
+  $("status-week").innerHTML = "NÄCHSTE: <span class=\"warn\"></span>"; $("status-week").lastChild.textContent = nextExam.fach.toUpperCase() + " IN " + d + (d === 1 ? " TAG" : " TAGEN");
+}
+function tickAlert() {
+  if (!nextExam) return;
+  let ms = new Date(nextExam.date + "T" + (nextExam.s || "08:00") + ":00") - new Date();
+  if (ms < 0) ms = 0;
+  const s = Math.floor(ms / 1000), p = n => String(n).padStart(2, "0");
+  $("alert-count").firstChild.textContent = p(Math.floor(s / 86400)) + ":" + p(Math.floor(s % 86400 / 3600)) + ":" + p(Math.floor(s % 3600 / 60)) + ":" + p(s % 60);
+}
+
+/* ================= Timer ================= */
+const C = 2 * Math.PI * 44; $("t-arc").style.strokeDasharray = C;
+let tLeft = 1500, tTotal = 1500, tRun = null, tPhase = "work";
+let tDone = store.get("done", { day: "", n: 0 }); if (tDone.day !== isoOf(new Date())) tDone = { day: isoOf(new Date()), n: 0 };
 const fmt = s => String(Math.floor(s / 60)).padStart(2, "0") + ":" + String(s % 60).padStart(2, "0");
 function tRender() {
-  document.getElementById("t-time").textContent = fmt(tLeft);
-  document.getElementById("t-phase").textContent = tPhase === "work" ? "Lernblock" : "Pause";
-  document.getElementById("t-bar").style.width = (100 - tLeft / tTotal * 100) + "%";
-  document.getElementById("t-start").textContent = tRun ? "Pause" : "Start";
-  document.getElementById("t-done").textContent = "Abgeschlossene Blöcke heute: " + tDone.n;
+  $("t-time").textContent = fmt(tLeft);
+  $("t-phase").textContent = tPhase === "work" ? "Lernblock" : "Pause";
+  $("t-arc").style.strokeDashoffset = C * (tLeft / tTotal);
+  $("tring").classList.toggle("brk", tPhase !== "work");
+  $("timer").classList.toggle("running", !!tRun);
+  $("t-start").textContent = tRun ? "Pause" : "Start";
+  $("t-done").textContent = "Abgeschlossene Blöcke heute: " + tDone.n;
 }
 function tTick() {
-  tLeft--;
-  if (tLeft <= 0) {
-    if (tPhase === "work") { tDone.n++; store.set("done", tDone); tPhase = "break"; tTotal = tLeft = 5 * 60; say("Lernblock abgeschlossen. Fünf Minuten Pause, Sir. Handy zählt nicht als Erholung."); }
-    else { tPhase = "work"; tTotal = tLeft = 25 * 60; say("Pause vorbei. Zurück an die Arbeit."); }
+  if (--tLeft <= 0) {
+    if (tPhase === "work") { tDone.n++; store.set("done", tDone); tPhase = "break"; tTotal = tLeft = 300; say("Lernblock abgeschlossen. Fünf Minuten Pause, Sir. Das Handy zählt nicht als Erholung."); const r = $("tring").getBoundingClientRect(); burst(r.left + r.width / 2, r.top + r.height / 2, 80); }
+    else { tPhase = "work"; tTotal = tLeft = 1500; say("Pause vorbei. Zurück an die Arbeit."); }
   }
   tRender();
 }
-document.getElementById("t-start").addEventListener("click", () => {
+$("t-start").addEventListener("click", () => {
   if (tRun) { clearInterval(tRun); tRun = null; say("Timer pausiert."); }
-  else { tRun = setInterval(tTick, 1000); say(tPhase === "work" ? "Fokus-Modus aktiviert. Ablenkungen werden ignoriert." : "Pause läuft."); }
+  else { tRun = setInterval(tTick, 1000); say(tPhase === "work" ? "Fokus-Modus aktiviert. Handy in einen anderen Raum, Sir." : "Pause läuft."); }
   tRender();
 });
-document.getElementById("t-reset").addEventListener("click", () => { clearInterval(tRun); tRun = null; tPhase = "work"; tTotal = tLeft = 25 * 60; tRender(); });
+$("t-reset").addEventListener("click", () => { clearInterval(tRun); tRun = null; tPhase = "work"; tTotal = tLeft = 1500; tRender(); });
 
-/* ---------- Uhr & Begrüßung ---------- */
-function clock() {
-  const n = new Date();
-  document.getElementById("clock").textContent = n.toLocaleTimeString("de-DE");
-  document.getElementById("date").textContent = n.toLocaleDateString("de-DE", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
-}
+/* ================= Uhr, Begrüßung, Begriff ================= */
+function clock() { const n = new Date(); $("clock").textContent = n.toLocaleTimeString("de-DE"); $("date").textContent = n.toLocaleDateString("de-DE", { weekday: "long", day: "numeric", month: "long", year: "numeric" }); tickAlert(); }
 const h = new Date().getHours();
-document.getElementById("greet").textContent =
-  h < 5 ? "Es ist mitten in der Nacht, Sir. Ich bewundere den Einsatz." :
-  h < 11 ? "Guten Morgen, Sir. Alle Systeme bereit." :
-  h < 17 ? "Guten Tag, Sir. Zeit, ein paar Notenpunkte zu sammeln." :
-  h < 22 ? "Guten Abend, Sir. Eine Runde geht noch." :
-           "Späte Schicht, Sir. Danach wird geschlafen.";
-const day = Math.floor(Date.now() / 864e5);
-const term = TERMS[day % TERMS.length];
-document.getElementById("term-word").textContent = term[0];
-document.getElementById("term-def").textContent = term[1];
+$("greet").textContent = h < 5 ? "Mitten in der Nacht, Sir. Licht aus war um 22:45." : h < 11 ? "Guten Morgen, Sir. Alle Systeme bereit." : h < 17 ? "Guten Tag, Sir. Zeit für ein paar Notenpunkte." : h < 22 ? "Guten Abend, Sir. Eine Runde geht noch." : "Späte Schicht, Sir. Danach wird geschlafen.";
+const wd = new Date().getDay();
+$("sub-greet").textContent = ferienToday() ? "Ferien. Erholung ist erlaubt, Vergessen nicht." : wd === 4 || wd === 5 ? "Schultag. Zwei Wortmeldungen pro Doppelstunde, die erste in den ersten 20 Minuten." : wd >= 1 && wd <= 3 ? "Praxistag. Lernblock am Morgen, danach gehört der Tag der Praxis." : "Wochenende. 60 Minuten Lernen, dann gehört der Tag Ihnen.";
+const term = TERMS[Math.floor(Date.now() / 864e5) % TERMS.length];
+$("term-fach").textContent = term[0].toUpperCase(); $("term-word").textContent = term[1]; $("term-def").textContent = term[2];
+setInterval(() => { if (!still) { $("brand").classList.remove("glitch"); void $("brand").offsetWidth; $("brand").classList.add("glitch"); } }, 7000);
 
-/* ---------- Start ---------- */
-document.getElementById("next").addEventListener("click", nextQuestion);
-filterEl.addEventListener("change", nextQuestion);
-document.getElementById("voice").addEventListener("change", e => { if (e.target.checked) say("Sprachausgabe aktiviert. Ich hoffe, Sie mögen meine Stimme."); });
-clock(); setInterval(clock, 1000);
-render(); renderExams(); tRender(); nextQuestion(); draw();
+/* ================= Boot ================= */
+function boot() {
+  const lines = ["Kern wird hochgefahren", "Stundenplan FOS22.1 AS geladen", allExams().length + " Klausuren im Visier", Q.length + " Fragen in 8 Fächern bereit", "Sarkasmus-Modul: aktiv"];
+  const box = $("boot-lines"), bar = $("boot-bar");
+  let i = 0;
+  const done = () => { $("boot").classList.add("off"); say(nextExam ? "Willkommen zurück, Sir. " + nextExam.fach + " in " + dDays(nextExam.date) + " Tagen. Wir sollten anfangen." : "Willkommen zurück, Sir.", false); };
+  if (still) { done(); return; }
+  const iv = setInterval(() => {
+    if (i < lines.length) { const d = document.createElement("div"); d.innerHTML = lines[i] + ' <span class="ok">✓</span>'; box.appendChild(d); bar.style.width = ((i + 1) / lines.length * 100) + "%"; i++; }
+    else { clearInterval(iv); setTimeout(done, 250); }
+  }, 300);
+  $("boot-skip").addEventListener("click", () => { clearInterval(iv); done(); document.querySelectorAll(".panel").forEach(p => p.style.animationDelay = "0s"); });
+}
+
+/* ================= Start ================= */
+$("next").addEventListener("click", nextQuestion);
+$("filter").addEventListener("change", nextQuestion);
+$("voice").addEventListener("change", e => { if (e.target.checked) say("Sprachausgabe aktiviert. Ich hoffe, Sie mögen meine Stimme."); });
+addEventListener("resize", sizeBg);
+sizeBg(); renderAlert(); render(); renderExams(); renderDay(); tRender(); nextQuestion(); clock();
+setInterval(clock, 1000); setInterval(renderDay, 60000);
+loop(); boot();
 })();
 </script>
 </body>
