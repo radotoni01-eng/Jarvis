@@ -574,7 +574,7 @@ nav.tabs .ico { display: none; }
 .vm-dict { width: min(720px, 100%); }
 .vm-dict textarea { width: 100%; min-height: 76px; background: rgba(4,9,15,.85); border: 1px solid var(--cyan); padding: 12px; font-size: 18px; resize: none; box-shadow: 0 0 30px rgba(var(--p),.15); }
 .vm-voice { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; align-items: center; max-width: 92vw; }
-.vm-voice .sel { max-width: 230px; } .vm-voice .seg button[aria-pressed="true"] { background: rgba(var(--p),.18); color: var(--cyan); border-color: var(--cyan); }
+.vm-voice .sel { max-width: 230px; } .vm-vstat { font-family: var(--mono); font-size: 11px; letter-spacing: .06em; min-height: 1.2em; } .vm-vstat.ok { color: var(--good); } .vm-vstat.load { color: var(--amber); } .vm-voice .seg button[aria-pressed="true"] { background: rgba(var(--p),.18); color: var(--cyan); border-color: var(--cyan); }
 .vm-opts { display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; font-size: 12px; color: var(--muted); }
 #vm .toggle input, #set .toggle input { accent-color: var(--cyan); width: 18px; height: 18px; }
 
@@ -747,10 +747,11 @@ body.hid *, body.hid *::before, body.hid *::after { animation-play-state: paused
   </div>
   <button class="vm-mic" id="vm-mic" type="button" aria-label="Sprechen">🎙</button>
   <div class="vm-voice">
-    <div class="seg" id="vm-preset" role="group" aria-label="Stimmprofil"><button type="button" data-p="jarvis">Jarvis ♂</button><button type="button" data-p="friday">Freitag ♀</button><button type="button" data-p="custom">Eigene</button></div>
+    <div class="seg" id="vm-preset" role="group" aria-label="Stimmprofil"><button type="button" data-p="jarvis">Jarvis ♂ Neural</button><button type="button" data-p="friday">Freitag ♀</button><button type="button" data-p="custom">Eigene</button></div>
     <select class="sel" id="vm-voice" aria-label="Stimme wählen"></select>
     <button class="tbtn" id="vm-test" type="button">▶ Probe</button>
   </div>
+  <div class="note center vm-vstat" id="vm-vstat"></div>
   <div class="vm-opts">
     <label class="toggle" for="vm-hands"><input type="checkbox" id="vm-hands" checked> Freihändig weiter zuhören</label>
     <label class="toggle" for="vm-agent"><input type="checkbox" id="vm-agent"> Agent-Werkzeuge</label>
@@ -2280,6 +2281,46 @@ function fillVoiceSelect() {
     s.value = S.voiceName || ""; });
   document.querySelectorAll("#vm-preset button").forEach(b => b.setAttribute("aria-pressed", b.dataset.p === (S.voiceName ? "custom" : S.vpreset || "jarvis") ? "true" : "false"));
 }
+/* ===== Neural-Stimme: Piper „Thorsten“ lokal im Browser (WASM) ===== */
+const NTTS = (() => {
+  const base = "tts/", possible = typeof Worker !== "undefined" && typeof WebAssembly === "object";
+  let ph = null, ox = null, cfg = null, ready = null, state = possible ? "off" : "fail", rid = 0, phQ = Promise.resolve(); const pend = new Map(), subs = [];
+  const emit = () => subs.forEach(f => { try { f(state); } catch {} });
+  const timeout = (pr, ms, what) => Promise.race([pr, new Promise((_, rej) => setTimeout(() => rej(new Error(what + ": Zeitüberschreitung")), ms))]);
+  function init() {
+    if (ready) return ready; if (!possible) return Promise.reject(new Error("kein WebAssembly"));
+    state = "loading"; emit();
+    ready = timeout((async () => {
+      const r = await fetch(base + "jarvis-de.json"); if (!r.ok) throw new Error("Stimmdaten fehlen"); cfg = await r.json();
+      const abs = new URL(base, location.href).href;
+      ph = new Worker(abs + "phonemize-worker.js", { type: "module" }); ox = new Worker(abs + "ort-worker.js", { type: "module" });
+      ox.onmessage = e => { const d = e.data, h = pend.get(d.id); if (!h) return; pend.delete(d.id); d.err ? h.rej(new Error(d.err)) : h.res(d.pcm || true); };
+      const bad = e => { state = "fail"; emit(); pend.forEach(h => h.rej(new Error("Worker-Fehler"))); pend.clear(); };
+      ox.onerror = bad; ph.onerror = bad;
+      ph.postMessage({ type: "constructor", data: { basePath: abs } });
+      await Promise.all([
+        new Promise(res => { ph.onmessage = () => res(); ph.postMessage({ type: "loadModule", data: [] }); }),
+        new Promise((res, rej) => { const id = ++rid; pend.set(id, { res, rej }); ox.postMessage({ id, type: "init", model: "jarvis-de-model.wasm" }); })
+      ]);
+      state = "ready"; emit(); return true;
+    })(), 180000, "Laden").catch(e => { state = "fail"; emit(); ready = null; throw e; });
+    return ready;
+  }
+  const say = t => t.replace(/\bz\.\s?B\./g, "zum Beispiel").replace(/\bd\.\s?h\./g, "das heißt").replace(/\bu\.\s?a\./g, "unter anderem").replace(/\bbzw\./g, "beziehungsweise").replace(/\bggf\./g, "gegebenenfalls")
+    .replace(/\bevtl\./g, "eventuell").replace(/\binkl\./g, "inklusive").replace(/\busw\./g, "und so weiter").replace(/\bbspw\./g, "beispielsweise").replace(/\bvgl\./g, "vergleiche").replace(/\bca\./g, "circa")
+    .replace(/\bNr\./g, "Nummer").replace(/\bStd\./g, "Stunde").replace(/\bDr\./g, "Doktor").replace(/\bJARVIS\b|\bJ\.A\.R\.V\.I\.S\.?/g, "Jarvis").replace(/\bFOS\b/g, "F O S").replace(/\bKI\b/g, "K I").replace(/→|⇒/g, ", also ").replace(/&/g, " und ").replace(/%/g, " Prozent");
+  function phon(text) {
+    const job = phQ.then(() => new Promise(res => { ph.onmessage = e => res(e.data); ph.postMessage({ type: "phonemize", data: [say(text), [{ phoneme_id_map: {}, espeak: { voice: cfg.espeak || "de" } }]] }); }));
+    phQ = job.catch(() => {}); return job;
+  }
+  async function synth(text, rate) {
+    await init(); const p = await timeout(phon(text), 20000, "Phonemisierung"); const ids = p && p.phoneme_ids || []; if (ids.length < 3) return new Float32Array(0);
+    const inf = cfg.inference || {}, id = ++rid;
+    return timeout(new Promise((res, rej) => { pend.set(id, { res, rej }); ox.postMessage({ id, type: "run", ids, scales: [inf.noise_scale ?? .667, (inf.length_scale ?? 1) / Math.max(.6, Math.min(1.6, rate || 1)), inf.noise_w ?? .8] }); }), 45000, "Synthese");
+  }
+  return { init, synth, possible, get state() { return state; }, get sr() { return cfg && cfg.sample_rate || 22050; }, on(f) { subs.push(f); } };
+})();
+function neuralWanted(lang) { return lang !== "en" && S.neural !== false && !S.voiceName && (S.vpreset || "jarvis") === "jarvis" && NTTS.possible && NTTS.state !== "fail"; }
 const TTS = (() => {
   const synth = window.speechSynthesis || null; let voices = [], q = 0, gen = 0, onIdle = null, estEnd = 0;
   function loadVoices() { try { voices = synth ? synth.getVoices() || [] : []; } catch { voices = []; } fillVoiceSelect(); }
@@ -2302,9 +2343,38 @@ const TTS = (() => {
   const protect = t => t.replace(ABBR, m => m.slice(0, -1) + "∯").replace(/(\d)\.(?=\d)/g, "$1∯").replace(/(\d)\.(?=\s+[A-ZÄÖÜa-zäöü])/g, "$1∯");
   function split(t) { const p = protect(t); const parts = p.match(/[^.!?…]+[.!?…]+["“”'»)\]]*|[^.!?…]+$/g) || [p]; return parts.map(s => s.replace(/∯/g, ".").trim()).filter(s => /[0-9A-Za-zÄÖÜäöüß]/.test(s)); }
   function finish(my) { if (my !== gen) return; q = Math.max(0, q - 1); if (q === 0) { estEnd = 0; if (!busy && !vmOn && orbBig.state === "speak") orb.set("idle"); const f = onIdle; onIdle = null; if (f) f(); } }
+  let nChain = Promise.resolve(), nSrc = null;
+  function nEnqueue(text, opt, my) {
+    q++; let done = false; const end = () => { if (done) return; done = true; if (opt.onsent) opt.onsent(); finish(my); };
+    const job = NTTS.synth(text, S.rate || 1); job.catch(() => {});
+    nChain = nChain.then(async () => {
+      if (my !== gen) return end();
+      let pcm; try { pcm = await job; } catch (e) { console.warn("Neural-TTS:", e); if (my === gen && synth) { done = true; q--; sysEnqueue(text, opt, my); } else end(); return; }
+      if (my !== gen || !pcm || !pcm.length) return end();
+      const ctx = ac(); if (ctx.state !== "running") { try { await ctx.resume(); } catch {} }
+      const buf = ctx.createBuffer(1, pcm.length, NTTS.sr); buf.getChannelData(0).set(pcm);
+      const src = ctx.createBufferSource(); src.buffer = buf; src.connect(ctx.destination); nSrc = src;
+      await new Promise(res => {
+        const dur = pcm.length / NTTS.sr, sr = NTTS.sr; let t0 = 0, iv = 0, wd = 0;
+        const fin = () => { clearInterval(iv); clearTimeout(wd); res(); };
+        src.onended = fin; wd = setTimeout(fin, dur * 1000 + 2500);
+        if (!vmOn) orb.set("speak", "SPRICHT"); if (opt.onstart) opt.onstart();
+        try { src.start(); t0 = ctx.currentTime; } catch { fin(); return; }
+        iv = setInterval(() => { const i = Math.floor((ctx.currentTime - t0) * sr); if (i < 0 || i >= pcm.length) return; let s2 = 0; for (let k = i; k < Math.min(pcm.length, i + 1024); k += 4) s2 += pcm[k] * pcm[k]; if (Math.sqrt(s2 / 256) > .045) { orb.kick(.16); vmBeat(); } }, 90);
+      });
+      if (nSrc === src) nSrc = null; end();
+    });
+  }
   function enqueue(text, opt = {}) {
+    if (!text) { if (opt.onsent) opt.onsent(); return; }
+    const lang = opt.lang || "de";
+    if (neuralWanted(lang) && (NTTS.state === "ready" || !synth || opt.waitNeural)) return nEnqueue(text, opt, gen);
+    if (neuralWanted(lang) && NTTS.state === "off") NTTS.init().catch(() => {});
+    sysEnqueue(text, opt, gen);
+  }
+  function sysEnqueue(text, opt, my0) {
     if (!synth || !text) { if (opt.onsent) opt.onsent(); return; }
-    const my = gen, lang = opt.lang || "de", u = new SpeechSynthesisUtterance(text);
+    const my = my0, lang = opt.lang || "de", u = new SpeechSynthesisUtterance(text);
     u.lang = lang === "en" ? "en-GB" : "de-DE"; const v = pickVoice(lang); if (v) u.voice = v; u.rate = lang === "en" ? .95 : (S.rate || 1); u.pitch = lang === "en" ? 1 : (S.pitch || 1);
     q++; let ended = false; const now = performance.now(); estEnd = Math.max(now, estEnd) + 700 + text.length * 80 / u.rate;
     const end = () => { if (ended) return; ended = true; clearTimeout(wd); if (opt.onsent) opt.onsent(); finish(my); };
@@ -2317,10 +2387,10 @@ const TTS = (() => {
   return {
     clean, split, protect, enqueue, pickVoice,
     say(text, opt = {}) { split(clean(text)).forEach(s => enqueue(s, opt)); },
-    stop() { gen++; q = 0; onIdle = null; estEnd = 0; try { if (synth) synth.cancel(); } catch {} },
-    unlock() { if (!synth) return; try { const u = new SpeechSynthesisUtterance(" "); u.volume = 0; synth.speak(u); } catch {} },
+    stop() { gen++; q = 0; onIdle = null; estEnd = 0; nChain = Promise.resolve(); try { if (nSrc) nSrc.stop(); } catch {} nSrc = null; try { if (synth) synth.cancel(); } catch {} },
+    unlock() { try { const c = ac(); if (c.state !== "running") c.resume(); } catch {} if (!synth) return; try { const u = new SpeechSynthesisUtterance(" "); u.volume = 0; synth.speak(u); } catch {} },
     whenIdle(f) { if (q === 0) f(); else onIdle = f; },
-    get speaking() { return q > 0; }, get ok() { return !!synth; }
+    get speaking() { return q > 0; }, get ok() { return !!synth || NTTS.possible; }
   };
 })();
 
@@ -2469,7 +2539,7 @@ function vmState(s, label) {
 }
 function vmIdleLabel() { return vmSRBlocked ? "TIPPEN ZUM DIKTIEREN" : "TIPPEN ZUM SPRECHEN"; }
 function vmOpen() {
-  vmOn = true; $("vm").hidden = false; TTS.stop(); TTS.unlock(); unlock("voice");
+  vmOn = true; $("vm").hidden = false; TTS.stop(); TTS.unlock(); unlock("voice"); vstat(); if (neuralWanted("de") && NTTS.state === "off") NTTS.init().catch(() => {});
   $("vm-agent").disabled = !agentAvail(); $("vm-agent").checked = !!(S.agent && agentAvail());
   $("vm-you").textContent = ""; $("vm-ans").textContent = sampleNS ? "Sprechen Sie, Sir. Ich höre." : "Ohne Verbindung zu claude.ai kann ich nicht antworten, Sir."; vmMode();
   if (!vmSRBlocked) vmListen(); else { vmState("idle", vmIdleLabel()); $("vm-in").focus(); }
@@ -2869,14 +2939,21 @@ function applyPerf() { document.body.classList.toggle("perf", !!S.perf); if (S.p
 function setOpen() { $("set").hidden = false; fillVoiceSelect(); $("set-rate").value = S.rate; $("set-pitch").value = S.pitch; $("set-rate-v").textContent = Number(S.rate).toFixed(2) + "×"; $("set-pitch-v").textContent = Number(S.pitch).toFixed(2); $("set-perf").checked = !!S.perf; $("set-swipe").checked = S.swipe !== false; $("set-restore").hidden = true; $("set-reset-c").hidden = true; }
 function setClose() { $("set").hidden = true; }
 $("b-set").addEventListener("click", setOpen); $("set-close").addEventListener("click", setClose);
-function setVoice(name) { S.voiceName = name; save(); fillVoiceSelect(); }
+function vstat() {
+  const e = $("vm-vstat"); if (!e) return; const st = NTTS.state, neural = (S.vpreset || "jarvis") === "jarvis" && !S.voiceName && S.neural !== false;
+  e.className = "note center vm-vstat" + (neural && st === "ready" ? " ok" : neural && st === "loading" ? " load" : "");
+  e.textContent = !neural ? "Systemstimme Ihres Geräts" : st === "ready" ? "◉ Neural-Stimme aktiv · läuft offline auf Ihrem Gerät" : st === "loading" ? "◌ Neural-Stimme lädt … (einmalig ca. 50 MB)" : st === "fail" ? "Neural-Stimme nicht verfügbar – Systemstimme als Ersatz" : "Neural-Stimme startet beim ersten Sprechen";
+}
+NTTS.on(vstat);
+document.addEventListener("pointerdown", () => { try { if (actx && actx.state !== "running") actx.resume(); } catch {} }, { passive: true });
+function setVoice(name) { S.voiceName = name; save(); fillVoiceSelect(); vstat(); }
 $("set-voice").addEventListener("change", () => setVoice($("set-voice").value));
 $("vm-voice").addEventListener("change", () => { setVoice($("vm-voice").value); voiceProbe(); });
 document.querySelectorAll("#vm-preset button").forEach(b => b.addEventListener("click", () => {
   const p = b.dataset.p; if (p === "custom") { $("vm-voice").focus(); try { $("vm-voice").showPicker(); } catch {} return; }
-  S.vpreset = p; S.voiceName = ""; S.rate = VPRESET[p].rate; S.pitch = VPRESET[p].pitch; save(); fillVoiceSelect(); voiceProbe();
+  S.vpreset = p; S.voiceName = ""; S.rate = VPRESET[p].rate; S.pitch = VPRESET[p].pitch; save(); fillVoiceSelect(); vstat(); voiceProbe();
 }));
-function voiceProbe() { TTS.stop(); TTS.say(S.vpreset === "friday" && !S.voiceName ? "Freitag hier. Ich übernehme, solange Jarvis Pause macht, Sir." : "Zu Diensten, Sir. So klinge ich ab jetzt. Gefällt es Ihnen, oder soll ich mich noch einmal umziehen?"); }
+function voiceProbe() { TTS.stop(); TTS.unlock(); vstat(); TTS.say(S.vpreset === "friday" && !S.voiceName ? "Freitag hier. Ich übernehme, solange Jarvis Pause macht, Sir." : "Zu Diensten, Sir. So klinge ich ab jetzt. Gefällt es Ihnen, oder soll ich mich noch einmal umziehen?", { waitNeural: true }); }
 $("vm-test").addEventListener("click", voiceProbe);
 $("set-rate").addEventListener("input", () => { S.rate = Number($("set-rate").value); $("set-rate-v").textContent = S.rate.toFixed(2) + "×"; save(); });
 $("set-pitch").addEventListener("input", () => { S.pitch = Number($("set-pitch").value); $("set-pitch-v").textContent = S.pitch.toFixed(2); save(); });

@@ -1,0 +1,6 @@
+jarvis-de-model.wasm
+ort.wasm
+ort.js
+ort-glue.js
+piper_phonemize.wasm
+piper_phonemize-data.wasm
