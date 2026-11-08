@@ -586,6 +586,9 @@ nav.tabs .ico { display: none; }
 @keyframes micpulse { 50% { box-shadow: 0 0 0 18px rgba(77,227,165,.12), 0 0 44px rgba(77,227,165,.45); } }
 @keyframes micpulse2 { 50% { box-shadow: 0 0 0 14px rgba(var(--v),.12), 0 0 40px rgba(var(--v),.45); } }
 .vm-dict { width: min(720px, 100%); }
+.vm-modes button { letter-spacing: .06em; font-size: 11px; padding: 4px 10px; } .vm-modes button[aria-pressed="true"] { background: rgba(var(--p),.18); color: var(--cyan); border-color: var(--cyan); }
+.vm-hint { max-width: 560px; color: var(--amber); font-size: 12px; line-height: 1.45; }
+@media (max-width: 560px) { .vm-top { flex-wrap: wrap; justify-content: center; } }
 .vm-dict textarea { width: 100%; min-height: 76px; background: rgba(4,9,15,.85); border: 1px solid var(--cyan); padding: 12px; font-size: 18px; resize: none; box-shadow: 0 0 30px rgba(var(--p),.15); }
 .vm-voice { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; align-items: center; max-width: 92vw; }
 .vm-voice .sel { max-width: 230px; } .vm-vstat { font-family: var(--mono); font-size: 11px; letter-spacing: .06em; min-height: 1.2em; } .vm-vstat.ok { color: var(--good); } .vm-vstat.load { color: var(--amber); } .vm-voice .seg button[aria-pressed="true"] { background: rgba(var(--p),.18); color: var(--cyan); border-color: var(--cyan); }
@@ -749,7 +752,8 @@ body.hid *, body.hid *::before, body.hid *::after { animation-play-state: paused
 <div id="scrim" hidden></div>
 
 <div id="vm" hidden role="dialog" aria-label="Sprachchat">
-  <div class="vm-top"><span>SPRACHCHAT · <span id="vm-mode">MIKROFON</span></span><button class="tbtn" id="vm-close" type="button">✕ Beenden</button></div>
+  <div class="vm-top"><span>SPRACHCHAT · <span id="vm-mode">MIKROFON</span></span><div class="seg vm-modes" id="vm-modes" role="group" aria-label="Eingabe"><button type="button" data-m="mic">🎙 Sprechen</button><button type="button" data-m="dict">⌨ Diktieren</button></div><button class="tbtn" id="vm-close" type="button">✕ Beenden</button></div>
+  <div class="note center vm-hint" id="vm-hint" hidden></div>
   <canvas id="vm-orb" width="640" height="640" aria-hidden="true"></canvas>
   <div class="vm-state" id="vm-state">BEREIT</div>
   <div class="vm-bars" id="vm-bars" aria-hidden="true"></div>
@@ -2589,7 +2593,17 @@ function openDrawer() { if (innerWidth <= 1180) { $("chats").classList.add("open
 
 /* ---------- Sprachchat ---------- */
 const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-let vmOn = false, vmRec = null, vmSRBlocked = !SR, vmTimer = null, vmLevel = 0, vmPos = 0, vmSents = [];
+let vmOn = false, vmRec = null, vmSRBlocked = !SR, vmTimer = null, vmLevel = 0, vmPos = 0, vmSents = [], vmMicOK = null, vmWhy = SR ? "" : "Dieser Browser hat keine Spracherkennung.";
+const vmDict = () => vmSRBlocked || S.vmMode === "dict";
+function vmPolicyBlocks() { try { const fp = document.permissionsPolicy || document.featurePolicy; if (fp && fp.allowsFeature) return !fp.allowsFeature("microphone"); } catch {} return false; }
+async function vmProbeMic() {
+  if (vmMicOK !== null) return vmMicOK;
+  if (!SR) return (vmMicOK = false);
+  if (vmPolicyBlocks()) { vmWhy = "Die Claude-App gibt Artefakten kein Mikrofon frei."; return (vmMicOK = false); }
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) return (vmMicOK = true);
+  try { const st = await navigator.mediaDevices.getUserMedia({ audio: true }); st.getTracks().forEach(t => t.stop()); return (vmMicOK = true); }
+  catch (e) { const n = e && e.name; vmWhy = n === "NotFoundError" ? "Kein Mikrofon gefunden." : "Der Mikrofonzugriff wurde blockiert, von der Claude-App oder in den Einstellungen."; return (vmMicOK = false); }
+}
 orbVM = makeOrb($("vm-orb"), true);
 const vmBarsEls = Array.from({ length: 28 }, () => { const b = el("i"); $("vm-bars").appendChild(b); return b; });
 function vmBeat() { vmLevel = 1; }
@@ -2597,32 +2611,37 @@ function vmBars() {
   vmLevel *= .92; const st = orbVM.state, t = performance.now() / 1000;
   vmBarsEls.forEach((b, i) => { let v; if (st === "speak") v = .2 + .6 * Math.abs(Math.sin(t * 7 + i * .55)) * (.45 + vmLevel * .7) + Math.random() * .12; else if (st === "listen") v = .1 + Math.random() * (.15 + vmLevel * .85); else if (st === "think") v = .12 + .3 * (1 + Math.sin(t * 5 - i * .45)) / 2; else v = .06 + .05 * (1 + Math.sin(t * 2 + i * .3)) / 2; b.style.transform = "scaleY(" + Math.min(1, v).toFixed(3) + ")"; });
 }
-function vmMode() { $("vm-mode").textContent = vmSRBlocked ? "DIKTAT" : "MIKROFON"; $("vm-dict").hidden = !vmSRBlocked; }
+function vmMode() {
+  const d = vmDict(); $("vm-mode").textContent = d ? "DIKTAT" : "MIKROFON"; $("vm-dict").hidden = !d;
+  document.querySelectorAll("#vm-modes button").forEach(b => b.setAttribute("aria-pressed", (b.dataset.m === "dict") === d ? "true" : "false"));
+  const h = $("vm-hint"); h.hidden = !vmSRBlocked; if (vmSRBlocked) h.textContent = (vmWhy || "Das Mikrofon ist hier nicht verfügbar.") + " Diktat funktioniert trotzdem: ins Feld tippen, das 🎙 der Tastatur drücken und reden. Ich sende automatisch, wenn Sie kurz Pause machen.";
+}
 function vmState(s, label) {
   $("vm-state").textContent = label; const m = $("vm-mic"); m.classList.toggle("live", s === "listen"); m.classList.toggle("busy", s === "busy");
   m.textContent = s === "busy" ? "■" : s === "speak" ? "❚❚" : "🎙"; m.setAttribute("aria-label", s === "busy" ? "Stopp" : s === "speak" ? "Unterbrechen" : "Sprechen");
   orb.set(s === "listen" ? "listen" : s === "busy" ? "think" : s === "speak" ? "speak" : "idle", label);
 }
-function vmIdleLabel() { return vmSRBlocked ? "TIPPEN ZUM DIKTIEREN" : "TIPPEN ZUM SPRECHEN"; }
+function vmIdleLabel() { return vmDict() ? "TIPPEN ZUM DIKTIEREN" : "TIPPEN ZUM SPRECHEN"; }
 function vmOpen() {
   vmOn = true; $("vm").hidden = false; TTS.stop(); TTS.unlock(); unlock("voice"); vstat(); if (neuralWanted("de") && NTTS.state === "off") NTTS.init().catch(() => {});
   $("vm-agent").disabled = !agentAvail(); $("vm-agent").checked = !!(S.agent && agentAvail());
   $("vm-you").textContent = ""; $("vm-ans").textContent = sampleNS ? "Sprechen Sie, Sir. Ich höre." : "Ohne Verbindung zu claude.ai kann ich nicht antworten, Sir."; vmMode();
-  if (!vmSRBlocked) vmListen(); else { vmState("idle", vmIdleLabel()); $("vm-in").focus(); }
+  if (!vmDict()) vmListen(); else { vmState("idle", vmIdleLabel()); $("vm-in").focus(); }
 }
 function vmClose() { vmOn = false; $("vm").hidden = true; clearTimeout(vmTimer); if (vmRec) { try { vmRec.abort(); } catch {} vmRec = null; } TTS.stop(); if (busy && ctl) ctl.abort(); orb.set("idle"); }
-function vmBlock() { if (vmSRBlocked) return; vmSRBlocked = true; vmMode(); vmState("idle", vmIdleLabel()); toast("MIKROFON GESPERRT", "Diktat-Modus aktiv", "Ins Feld tippen und das 🎙 der Tastatur nutzen."); }
-function vmListen() {
+function vmBlock(why) { if (why) vmWhy = why; vmMicOK = false; if (vmSRBlocked) return; vmSRBlocked = true; vmMode(); vmState("idle", vmIdleLabel()); toast("MIKROFON GESPERRT", "Diktat-Modus aktiv", "Ins Feld tippen und das 🎙 der Tastatur nutzen."); }
+async function vmListen() {
   if (!vmOn || busy) return; TTS.stop();
-  if (vmSRBlocked) { vmState("idle", vmIdleLabel()); $("vm-in").focus(); return; }
+  if (vmDict()) { vmState("idle", vmIdleLabel()); $("vm-in").focus(); return; }
+  if (vmMicOK === null) { vmState("listen", "MIKROFON WIRD GEPRÜFT …"); const ok = await vmProbeMic(); if (!ok) { vmBlock(); $("vm-in").focus(); return; } if (!vmOn || busy) return; }
   let final = "", heard = false, r;
   try { r = new SR(); r.lang = "de-DE"; r.interimResults = true; r.continuous = false; r.maxAlternatives = 1; } catch { vmBlock(); return; }
   vmRec = r;
   r.onaudiostart = () => { heard = true; };
   r.onresult = e => { let interim = ""; for (let i = e.resultIndex; i < e.results.length; i++) { const tx = e.results[i][0].transcript; if (e.results[i].isFinal) final += tx; else interim += tx; } $("vm-you").textContent = (final + " " + interim).trim(); orb.kick(.3); vmBeat(); };
-  r.onerror = e => { const er = e && e.error; if (["not-allowed", "service-not-allowed", "audio-capture"].includes(er)) vmBlock(); else if (er && er !== "no-speech" && er !== "aborted") toast("SPRACHE", "Fehler: " + er); };
-  r.onend = () => { if (vmRec === r) vmRec = null; if (!vmOn) return; const tx = final.trim(); if (tx) vmSend(tx); else if (!vmSRBlocked && !busy) vmState("idle", vmIdleLabel()); };
-  try { r.start(); vmState("listen", "HÖRT ZU …"); setTimeout(() => { if (vmRec === r && !heard) { try { r.abort(); } catch {} vmBlock(); } }, 3500); } catch { vmBlock(); }
+  r.onerror = e => { const er = e && e.error; if (er === "not-allowed" || er === "audio-capture") vmBlock("Der Mikrofonzugriff wurde blockiert, von der Claude-App oder in den Einstellungen."); else if (er === "service-not-allowed") vmBlock("Die Spracherkennung des Browsers ist hier nicht erlaubt."); else if (er === "network") toast("SPRACHE", "Spracherkennung offline", "Die Erkennung braucht Internet. Diktat geht trotzdem."); else if (er && er !== "no-speech" && er !== "aborted") toast("SPRACHE", "Fehler: " + er); };
+  r.onend = () => { if (vmRec === r) vmRec = null; if (!vmOn) return; const tx = final.trim(); if (tx) vmSend(tx); else if (!vmSRBlocked && !busy) vmState("idle", heard ? "NICHTS VERSTANDEN – NOCHMAL TIPPEN" : vmIdleLabel()); };
+  try { r.start(); vmState("listen", "HÖRT ZU …"); setTimeout(() => { if (vmRec === r && !heard && !final) { try { r.abort(); } catch {} } }, 8000); } catch { vmBlock("Die Spracherkennung ließ sich nicht starten."); }
 }
 $("vm-in").addEventListener("input", () => {
   orb.kick(.2); vmBeat(); clearTimeout(vmTimer); const v = $("vm-in").value.trim(); $("vm-you").textContent = v; if (v && !busy) orb.set("listen", "HÖRT ZU …");
@@ -2631,11 +2650,15 @@ $("vm-in").addEventListener("input", () => {
 $("vm-in").addEventListener("keydown", e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); clearTimeout(vmTimer); const t = $("vm-in").value.trim(); if (t && !busy) { $("vm-in").value = ""; vmSend(t); } } });
 $("vm-mic").addEventListener("click", () => {
   if (busy) { if (ctl) ctl.abort(); return; }
-  if (TTS.speaking) { TTS.stop(); vmState("idle", vmIdleLabel()); if (vmSRBlocked) $("vm-in").focus(); else vmListen(); return; }
+  if (TTS.speaking) { TTS.stop(); vmState("idle", vmIdleLabel()); if (vmDict()) $("vm-in").focus(); else vmListen(); return; }
   if (vmRec) { try { vmRec.stop(); } catch {} return; }
   vmListen();
 });
 $("vm-close").addEventListener("click", vmClose);
+document.querySelectorAll("#vm-modes button").forEach(b => b.addEventListener("click", () => {
+  if (b.dataset.m === "mic") { S.vmMode = "mic"; save(); if (vmSRBlocked && SR) { vmSRBlocked = false; vmMicOK = null; vmWhy = ""; } if (vmRec) { try { vmRec.abort(); } catch {} vmRec = null; } vmMode(); if (!busy && !TTS.speaking) vmListen(); }
+  else { S.vmMode = "dict"; save(); if (vmRec) { try { vmRec.abort(); } catch {} vmRec = null; } vmMode(); vmState("idle", vmIdleLabel()); $("vm-in").focus(); }
+}));
 $("voice-btn").addEventListener("click", vmOpen);
 async function vmSend(text) {
   if (!vmOn || busy) return; clearTimeout(vmTimer); $("vm-you").textContent = "„" + text + "“"; vmPos = 0; vmSents = []; $("vm-ans").innerHTML = ""; vmState("busy", "DENKT NACH …"); sfx.send();
@@ -2653,7 +2676,7 @@ const vmPrep = full => TTS.clean(String(full || "").replace(/⟦[^⟧]*⟧?\s*$/
 function vmFeed(full) { if (!vmOn) return; const c = vmPrep(full), rest = c.slice(vmPos), m = TTS.protect(rest).match(/^[\s\S]*[.!?…](?=\s)/); if (!m) return; const len = m[0].length; vmPos += len; vmAddSentences(TTS.split(rest.slice(0, len))); }
 function vmFinish(full) {
   if (!vmOn) return; const c = vmPrep(full), rest = c.slice(vmPos); vmPos = c.length; if (rest.trim()) vmAddSentences(TTS.split(rest)); if (!vmSents.length && c) vmAddSentences(TTS.split(c));
-  TTS.whenIdle(() => { if (!vmOn) return; vmState("idle", vmIdleLabel()); if ($("vm-hands").checked && !vmSRBlocked) setTimeout(vmListen, 350); });
+  TTS.whenIdle(() => { if (!vmOn) return; vmState("idle", vmIdleLabel()); if (vmDict()) { try { $("vm-in").focus({ preventScroll: true }); } catch {} } else if ($("vm-hands").checked) setTimeout(vmListen, 350); });
 }
 function vmFail(code) { if (!vmOn) return; if (code === "cancelled") { TTS.stop(); vmState("idle", "GESTOPPT"); return; } $("vm-ans").textContent = "Störung in der Leitung, Sir. Versuchen Sie es noch einmal."; vmState("idle", "STÖRUNG"); }
 
