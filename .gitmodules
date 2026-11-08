@@ -1,0 +1,4 @@
+[submodule "vendor/omniroute"]
+	path = vendor/omniroute
+	url = https://github.com/cheaper-inference/OmniRoute.git
+	shallow = true
