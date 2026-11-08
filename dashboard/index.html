@@ -465,6 +465,20 @@ form.grid2 label { display: flex; flex-direction: column; gap: 3px; font-size: 1
 .sc .gr button:hover { border-color: var(--bad); color: var(--bad); text-decoration: line-through; }
 .sc .need { font-size: 12px; color: var(--muted); }
 .sc .need b { color: var(--amber); }
+.g-pd { margin-top: 2px; color: var(--cyan) !important; }
+.g-need { font-size: 13px; color: var(--muted); margin-top: 8px; } .g-need b { color: var(--amber); }
+#g-add.g-form { grid-template-columns: 1.3fr .9fr 1fr .8fr auto; align-items: end; margin-top: 12px; }
+#g-add.g-form .btn { grid-column: auto; min-width: 46px; }
+@media (max-width: 680px) { #g-add.g-form { grid-template-columns: 1fr 1fr; } #g-add.g-form .btn { grid-column: 1 / -1; } }
+.g-info { margin-top: 12px; font-size: 13px; color: var(--muted); } .g-info summary { cursor: pointer; color: var(--cyan); font-family: var(--mono); font-size: 12px; letter-spacing: .06em; }
+.g-info ol { padding-left: 18px; margin: 8px 0; display: grid; gap: 6px; } .g-info b { color: var(--text); } .g-info a { color: var(--cyan); }
+.sc .h .pts { display: grid; justify-items: end; line-height: 1.1; } .sc .h small { font-family: var(--mono); font-size: 10px; color: var(--muted); white-space: nowrap; }
+.hjs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; margin: 6px 0; }
+.hjs label { display: grid; gap: 2px; font-family: var(--mono); font-size: 10px; color: var(--muted); text-align: center; }
+.hjs select, .exr select { font-family: var(--mono); font-size: 12px; background: rgba(var(--p),.06); color: var(--text); border: 1px solid var(--line); padding: 2px; width: 100%; }
+.hjs select.ovr { border-color: var(--good); color: var(--good); }
+.exr { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; font-family: var(--mono); font-size: 11px; color: var(--muted); margin: 4px 0; } .exr label { display: flex; gap: 4px; align-items: center; } .exr select { width: auto; }
+.sc.def { border-color: rgba(255,107,122,.6); } .sc .warn { color: var(--bad); font-size: 12px; }
 .todos { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
 .todo { display: grid; grid-template-columns: auto 1fr auto; gap: 10px; align-items: center; padding: 8px 10px; border: 1px solid var(--line); transition: all .3s; animation: msgin .3s ease both; }
 .todo.over { border-color: rgba(255,107,122,.6); }
@@ -903,7 +917,7 @@ body.hid *, body.hid *::before, body.hid *::after { animation-play-state: paused
         <div class="hud-line"><span>Jetzt</span><span id="hud-now">–</span></div>
         <div class="hud-line"><span>Wichtige Mails</span><span id="hud-mail">–</span></div>
         <div class="hud-line"><span>Offene To-dos</span><span id="hud-todo">–</span></div>
-        <div class="hud-line"><span>Notenschnitt</span><span id="hud-grade">–</span></div>
+        <div class="hud-line"><span>Fachabi-Prognose</span><span id="hud-grade">–</span></div>
         <div class="hud-line"><span>Lernserie</span><span id="hud-streak">–</span></div>
         <div class="hud-line"><span>Fokus</span><span id="hud-focus">25:00</span></div>
         <div class="hud-line"><span>Tagesmissionen</span><span id="hud-mis">0 / 3</span></div>
@@ -1100,25 +1114,39 @@ body.hid *, body.hid *::before, body.hid *::after { animation-play-state: paused
   <section class="view" id="v-noten" hidden>
     <div class="col">
       <div class="panel">
-        <h2>Notenzentrale <small>Ziel-Rechner</small></h2>
+        <h2>Fachabi-Rechner <small>Berlin · APO-FOS</small></h2>
         <div class="gauge">
-          <div class="gauge-box"><svg viewBox="0 0 100 100"><circle class="bgc" id="g-bg" cx="50" cy="50" r="42"></circle><circle class="fg" id="g-arc" cx="50" cy="50" r="42"></circle></svg><div class="val"><b id="g-val">–</b><span>GESAMTSCHNITT</span></div></div>
+          <div class="gauge-box"><svg viewBox="0 0 100 100"><circle class="bgc" id="g-bg" cx="50" cy="50" r="42"></circle><circle class="fg" id="g-arc" cx="50" cy="50" r="42"></circle></svg><div class="val"><b id="g-val">–</b><span>FACHABI-PROGNOSE</span><span id="g-pd" class="g-pd">– PUNKTE</span></div></div>
           <div>
-            <p style="margin:0 0 8px" id="g-say">Tragen Sie Ihre Noten ein, dann rechnet Jarvis.</p>
-            <div class="row" style="margin-top:6px">
-              <label class="toggle" for="g-target">Ziel-Ø <select class="sel" id="g-target"><option>1,0</option><option>1,3</option><option>1,5</option><option>1,7</option><option>2,0</option><option>2,5</option></select></label>
-              <label class="toggle" for="g-w">Klausuren zählen <select class="sel" id="g-w"><option value="40">40 %</option><option value="50">50 %</option><option value="60">60 %</option></select></label>
+            <p style="margin:0 0 8px" id="g-say">Tragen Sie Ihre Punkte ein, dann rechnet Jarvis nach der Berliner Verordnung.</p>
+            <div class="row" style="margin-top:6px;flex-wrap:wrap;gap:8px">
+              <label class="toggle" for="g-target">Ziel <select class="sel" id="g-target"><option>1,0</option><option>1,3</option><option>1,5</option><option>1,7</option><option>2,0</option><option>2,5</option><option>3,0</option></select></label>
+              <label class="toggle" for="g-pf4">4. Prüfungsfach <select class="sel" id="g-pf4"><option value="">– bei der Schule erfragen –</option></select></label>
             </div>
+            <div class="g-need" id="g-need"></div>
           </div>
         </div>
-        <form class="grid2" id="g-add" style="grid-template-columns:1.4fr 1fr 1fr auto;align-items:end">
+        <form class="grid2 g-form" id="g-add">
           <label>Fach<select class="sel" id="g-fach"></select></label>
-          <label>Note<select class="sel" id="g-note"></select></label>
-          <label>Art<select class="sel" id="g-art"><option>Klausur</option><option>Test</option><option>Mündlich</option><option>Sonstige</option></select></label>
-          <button class="btn amber" type="submit" aria-label="Note eintragen">＋</button>
+          <label>Punkte<select class="sel" id="g-note"></select></label>
+          <label>Art<select class="sel" id="g-art"><option>Klassenarbeit</option><option>Test</option><option>Mündlich</option><option>Sonstige</option></select></label>
+          <label>Halbjahr<select class="sel" id="g-hj"><option>11/1</option><option>11/2</option><option>12/1</option><option>12/2</option></select></label>
+          <button class="btn amber" type="submit" aria-label="Punkte eintragen">＋</button>
         </form>
+        <details class="g-info"><summary>So rechnet Berlin (APO-FOS) – Quellen</summary>
+          <ol>
+            <li><b>Halbjahrespunkte</b> (0–15) je Fach: Klassenarbeiten zählen <b>zur Hälfte</b>, der Rest sind mündliche, praktische und sonstige Leistungen. Gab es im Halbjahr nur <b>eine</b> Klassenarbeit, zählt sie <b>ein Drittel</b> (§ 21 Abs. 2 APO-FOS, Fassung 19.07.2023). Die echte Zeugnisnote legt die Lehrkraft fest. Tragen Sie sie über das Halbjahr-Feld ein, sobald Sie sie kennen.</li>
+            <li><b>H</b> = Mittel aller Halbjahrespunkte des Fachs (11/1 bis 12/2), auf eine Nachkommastelle, ohne Rundung.</li>
+            <li><b>Abschließende Punkte P</b> (ganze Zahl, ab ,5 aufgerundet): nicht geprüft P = H · nur schriftlich P = (H + S) : 2 · nur mündlich P = (2H + M) : 3 · schriftlich und mündlich P = (2H + 2S + M) : 5.</li>
+            <li><b>Endnote</b> je Fach: 13–15 = 1 · 10–12 = 2 · 7–9 = 3 · 5–6 = 4 · 1–4 = 5 · 0 = 6.</li>
+            <li><b>Punkteschnitt PD</b> = Mittel der P aller Fächer (zwei Nachkommastellen, ohne Rundung). <b>Durchschnittsnote</b> laut Tabelle: über 13,7 → 1,0 · über 13,4 → 1,1 · über 13,1 → 1,2 … jeweils 0,3 Punkte je Zehntel · bis 5,0 → 4,0.</li>
+            <li>Schriftlich geprüft werden Deutsch, Englisch, Mathematik und ein fachrichtungsbezogenes Fach (je vier Stunden). Mündliche Prüfungen sind möglich.</li>
+            <li><b>Unter 5 Punkten</b> ist ein Fach ein Defizit. Das gefährdet das Bestehen. Die genauen Ausgleichsregeln sollten Sie mit der Schule klären.</li>
+          </ol>
+          <p class="note">Quellen: <a href="https://www.parlament-berlin.de/ados/17/IIIPlen/vorgang/verordnungen/vo17-184.pdf" target="_blank" rel="noopener">APO-FOS Anlage 7.1 (Neufassung, Vorlage 17/184)</a> · <a href="https://www.parlament-berlin.de/ados/19/IIIPlen/vorgang/verordnungen/vo19-161.pdf" target="_blank" rel="noopener">6. Änderungsverordnung vom 19.07.2023 (§ 21)</a> · <a href="https://bildungsserver.berlin-brandenburg.de/pruefungen-fos" target="_blank" rel="noopener">Zentrale Prüfungen FOS Berlin</a>. Prognose ohne Gewähr: Verbindlich ist die Zeugnisnote.</p>
+        </details>
       </div>
-      <div class="panel"><h2>Fächer <small>Note anklicken = löschen</small></h2><div class="subj" id="subj"></div></div>
+      <div class="panel"><h2>Fächer <small>Punkte anklicken = löschen · Halbjahr-Feld = echte Zeugnispunkte</small></h2><div class="subj" id="subj"></div></div>
     </div>
     <div class="col">
       <div class="panel">
@@ -1261,7 +1289,7 @@ const hhmm = d => d.toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-di
 
 /* ================= ZUSTAND ================= */
 const DEF = { stats: { total: 0, right: 0, streak: 0, best: 0, topics: {} }, own: [], cards: {}, deck: [], err: {}, xp: 0, ach: {}, focus: { day: "", n: 0, total: 0 }, blitzBest: 0, cardsDone: 0,
-  act: {}, grades: [], gw: 50, gtarget: "1,5", todos: [], sound: false, voice: false, theme: "arc", agent: true, tier: "default", style: "jarvis",
+  act: {}, grades: [], gw: 50, gtarget: "1,0", zeug: {}, pruef: {}, pf4: "", fosStart: 2026, todos: [], sound: false, voice: false, theme: "arc", agent: true, tier: "default", style: "jarvis",
   mem: [], voc: {}, vocDeck: [], vocDir: "de", vocDone: 0, blurts: [], sims: [], day: {}, voiceName: "", vpreset: "jarvis", rate: 1.03, pitch: .9, perf: false, swipe: true };
 let S;
 try { S = Object.assign(structuredClone(DEF), JSON.parse(localStorage.getItem("jarvis3.state") || "{}")); } catch { S = structuredClone(DEF); }
@@ -1576,7 +1604,7 @@ function renderHud() {
   if (n) { const d = dDays(n.date); $("hud-exam").textContent = n.fach; $("hud-exam-s").textContent = "in " + d + (d === 1 ? " Tag" : " Tagen") + " · " + fmtD(n.date); ring.style.strokeDashoffset = C * Math.min(1, d / 14); $("hud-mission").textContent = d <= 7 ? "KLAUSURMODUS" : ""; }
   const imp = mails.filter(m => m.cat.p <= 2).length; $("hud-mail").textContent = !commsStarted ? "lädt …" : mails.length ? imp + " von " + mails.length : "–";
   $("hud-todo").textContent = S.todos.filter(t => !t.done).length; $("hud-mis").textContent = misDone() + " / 3";
-  const g = overallAvg(); $("hud-grade").textContent = g ? "Ø " + de1(g) : "–";
+  const g = overallAvg(); $("hud-grade").textContent = g ? de1(g) : "–";
   { const sd = streakDays(); $("hud-streak").textContent = sd + (sd === 1 ? " Tag" : " Tage"); }
 }
 
@@ -1791,35 +1819,72 @@ function renderBrief() {
 
 /* ================= NOTEN & AUFGABEN ================= */
 SUBJECTS.forEach(s => { $("g-fach").appendChild(Object.assign(el("option", null, s), { value: s })); $("todo-fach").appendChild(Object.assign(el("option", null, s), { value: s })); });
-NOTEN.forEach(([l, v]) => { const o = el("option", null, l); o.value = v; if (l === "2") o.selected = true; $("g-note").appendChild(o); });
-$("g-target").value = S.gtarget; $("g-w").value = String(S.gw);
+/* --- Fachabi-Rechner nach APO-FOS Berlin (Anlage 7.1, § 21 Abs. 2 i. d. F. v. 19.07.2023) --- */
+const HJS = ["11/1", "11/2", "12/1", "12/2"], WRITTEN = ["Deutsch", "Englisch", "Mathematik"];
+const PLBL = ["6", "5-", "5", "5+", "4-", "4", "4+", "3-", "3", "3+", "2-", "2", "2+", "1-", "1", "1+"];
+const ptsLbl = p => p + " (" + PLBL[p] + ")";
+const noteToPts = n => Math.max(0, Math.min(15, Math.round(17 - 3 * Number(n))));
+const de2 = n => n.toFixed(2).replace(".", ",");
+const trunc = (v, d) => { const f = Math.pow(10, d); return Math.floor(v * f + 1e-9) / f; };
+const roundHalfUp = v => Math.floor(trunc(v, 1) + .5);
+const endnote = P => P >= 13 ? 1 : P >= 10 ? 2 : P >= 7 ? 3 : P >= 5 ? 4 : P >= 1 ? 5 : 6;
+function hjOf(iso) { const d = new Date((iso || isoOf(new Date())) + "T12:00:00"), y = d.getFullYear(), m = d.getMonth() + 1, sy = m >= 8 ? y : y - 1, half = m >= 8 || m === 1 ? 1 : 2, k = Math.max(11, Math.min(12, 11 + sy - (S.fosStart || 2026))); return k + "/" + half; }
+function noteFromPD(pd) { const p = Math.floor(pd * 100 + 1e-6); if (p <= 500) return 4; return Math.max(10, Math.min(40, Math.floor((1670 - p) / 30) + 1)) / 10; }
+const pdNeeded = t => (1670 - 30 * Math.round(t * 10)) / 100;   // Punkteschnitt muss GRÖSSER sein
+const isWritten = f => WRITTEN.includes(f) || f === S.pf4;
+// Migration alter Einträge (Schulnote 1–6 → Notenpunkte, „Klausur“ → „Klassenarbeit“)
+S.zeug = S.zeug || {}; S.pruef = S.pruef || {};
+S.grades.forEach(g => { if (g.pts == null && g.note != null) g.pts = noteToPts(g.note); if (g.art === "Klausur") g.art = "Klassenarbeit"; if (!g.hj) g.hj = hjOf(g.date); });
+for (let p = 15; p >= 0; p--) { const o = el("option", null, ptsLbl(p)); o.value = p; if (p === 11) o.selected = true; $("g-note").appendChild(o); }
+SUBJECTS.filter(f => !WRITTEN.includes(f)).forEach(f => { const o = el("option", null, f); o.value = f; $("g-pf4").appendChild(o); });
+$("g-target").value = S.gtarget; $("g-pf4").value = S.pf4 || ""; $("g-hj").value = hjOf();
 const avg = a => a.length ? a.reduce((x, y) => x + y, 0) / a.length : null;
-function subjAvg(f) { const g = S.grades.filter(x => x.fach === f); if (!g.length) return null; const k = avg(g.filter(x => x.art === "Klausur").map(x => x.note)), o = avg(g.filter(x => x.art !== "Klausur").map(x => x.note)), w = S.gw / 100; return k != null && o != null ? w * k + (1 - w) * o : (k != null ? k : o); }
-function overallAvg() { return avg(SUBJECTS.map(subjAvg).filter(v => v != null)); }
-const noteLbl = v => (NOTEN.find(n => Math.abs(n[1] - v) < .01) || [de1(v)])[0];
-function addGrade(fach, note, art) {
-  const f = SUBJECTS.find(s => s.toLowerCase() === String(fach).toLowerCase()); if (!f) throw new Error("Unbekanntes Fach: " + fach);
-  const n = Number(note); if (!(n >= .7 && n <= 6)) throw new Error("Note muss zwischen 1 und 6 liegen");
-  const a = ["Klausur", "Test", "Mündlich", "Sonstige"].includes(art) ? art : "Sonstige";
-  S.grades.push({ id: uid(), fach: f, note: n, art: a, date: isoOf(new Date()) }); save(); unlock("grade"); renderNoten(); renderHud(); return f + ": " + noteLbl(n) + " (" + a + ") eingetragen. Fach-Ø jetzt " + de1(subjAvg(f)) + ".";
+function hjCalc(f, hj) {
+  const z = S.zeug[f + "|" + hj]; if (z != null && z !== "") return { v: Number(z), z: true };
+  const g = S.grades.filter(x => x.fach === f && x.hj === hj); if (!g.length) return null;
+  const K = g.filter(x => x.art === "Klassenarbeit").map(x => x.pts), O = g.filter(x => x.art !== "Klassenarbeit").map(x => x.pts);
+  const w = K.length === 1 ? 1 / 3 : .5, raw = K.length && O.length ? w * avg(K) + (1 - w) * avg(O) : avg(K.length ? K : O);
+  return { v: Math.round(raw), raw, z: false };
 }
-$("g-add").addEventListener("submit", e => { e.preventDefault(); try { addGrade($("g-fach").value, $("g-note").value, $("g-art").value); const r = e.target.querySelector("button").getBoundingClientRect(); burst(r.left + r.width / 2, r.top, 30); sfx.ok(); } catch (x) { toast("FEHLER", x.message); } });
+function subjCalc(f) {
+  const hs = HJS.map(h => hjCalc(f, h)), have = hs.filter(Boolean); if (!have.length) return null;
+  const H = trunc(avg(have.map(x => x.v)), 1), e = S.pruef[f] || {}, Sx = e.s === "" || e.s == null ? null : Number(e.s), M = e.m === "" || e.m == null ? null : Number(e.m);
+  const raw = Sx != null && M != null ? (2 * H + 2 * Sx + M) / 5 : Sx != null ? (H + Sx) / 2 : M != null ? (2 * H + M) / 3 : H;
+  const P = Math.max(0, Math.min(15, roundHalfUp(raw))); return { hs, H, P, note: endnote(P), S: Sx, M };
+}
+function fachabi() { const r = SUBJECTS.map(f => [f, subjCalc(f)]).filter(([, v]) => v); if (!r.length) return null; const pd = trunc(avg(r.map(([, v]) => v.P)), 2); return { pd, note: noteFromPD(pd), n: r.length, subj: Object.fromEntries(r), def: r.filter(([, v]) => v.P < 5).map(([f]) => f) }; }
+function subjAvg(f) { const c = subjCalc(f); return c ? c.P : null; }
+function overallAvg() { const r = fachabi(); return r ? r.note : null; }
+function addGrade(fach, punkte, art, hj, note) {
+  const f = SUBJECTS.find(s => s.toLowerCase() === String(fach).toLowerCase()); if (!f) throw new Error("Unbekanntes Fach: " + fach);
+  let p = punkte != null && punkte !== "" ? Number(punkte) : note != null ? noteToPts(note) : NaN; if (!(p >= 0 && p <= 15)) throw new Error("Punkte müssen zwischen 0 und 15 liegen");
+  p = Math.round(p); const a0 = art === "Klausur" ? "Klassenarbeit" : art, a = ["Klassenarbeit", "Test", "Mündlich", "Sonstige"].includes(a0) ? a0 : "Sonstige", h = HJS.includes(hj) ? hj : hjOf();
+  S.grades.push({ id: uid(), fach: f, pts: p, art: a, hj: h, date: isoOf(new Date()) }); save(); unlock("grade"); renderNoten(); renderHud();
+  const c = subjCalc(f), r = fachabi(); return f + ": " + ptsLbl(p) + " (" + a + ", " + h + ") eingetragen. Fach jetzt " + (c ? c.P + " Punkte" : "–") + (r ? ", Fachabi-Prognose " + de1(r.note) + " (Punkteschnitt " + de2(r.pd) + ")." : ".");
+}
+$("g-add").addEventListener("submit", e => { e.preventDefault(); try { addGrade($("g-fach").value, $("g-note").value, $("g-art").value, $("g-hj").value); const r = e.target.querySelector("button").getBoundingClientRect(); burst(r.left + r.width / 2, r.top, 30); sfx.ok(); } catch (x) { toast("FEHLER", x.message); } });
 $("g-target").addEventListener("change", () => { S.gtarget = $("g-target").value; save(); renderNoten(); });
-$("g-w").addEventListener("change", () => { S.gw = Number($("g-w").value); save(); renderNoten(); renderHud(); });
+$("g-pf4").addEventListener("change", () => { S.pf4 = $("g-pf4").value; save(); renderNoten(); });
+function ptsSelect(val, blank) { const s = el("select"); s.appendChild(Object.assign(el("option", null, blank), { value: "" })); for (let p = 15; p >= 0; p--) s.appendChild(Object.assign(el("option", null, String(p)), { value: p })); s.value = val == null ? "" : String(val); return s; }
 function renderNoten() {
-  const all = overallAvg(), C = 2 * Math.PI * 42, arcLen = C * .75; [$("g-arc"), $("g-bg")].forEach(c => c.style.strokeDasharray = arcLen + " " + C);
-  $("g-arc").style.strokeDashoffset = all ? arcLen * (1 - Math.max(0, Math.min(1, (6 - all) / 5))) : arcLen; $("g-val").textContent = all ? de1(all) : "–";
-  const T = parseFloat(S.gtarget.replace(",", "."));
-  $("g-say").textContent = !all ? "Tragen Sie Ihre Noten ein, dann rechnet Jarvis." : all <= T ? "Ø " + de1(all) + " – Ziel " + S.gtarget + " erreicht. Ich bin … zufrieden. Nicht weitersagen." : "Ø " + de1(all) + ". Bis zum Ziel " + S.gtarget + " fehlen " + de1(all - T) + " Notenstufen. Machbar, Sir – wenn wir anfangen.";
-  const box = $("subj"); box.innerHTML = ""; const w = S.gw / 100;
+  const r = fachabi(), all = r ? r.note : null, C = 2 * Math.PI * 42, arcLen = C * .75; [$("g-arc"), $("g-bg")].forEach(c => c.style.strokeDasharray = arcLen + " " + C);
+  $("g-arc").style.strokeDashoffset = all ? arcLen * (1 - Math.max(0, Math.min(1, (4 - all) / 3))) : arcLen; $("g-val").textContent = all ? de1(all) : "–"; $("g-pd").textContent = r ? de2(r.pd) + " PUNKTE" : "– PUNKTE";
+  const T = parseFloat(S.gtarget.replace(",", ".")), need = pdNeeded(T), tp = Math.min(15, Math.floor(need) + 1);
+  $("g-say").textContent = !r ? "Tragen Sie Ihre Punkte ein, dann rechnet Jarvis nach der Berliner Verordnung." : r.def.length ? "Achtung, Sir: Defizit in " + r.def.join(", ") + " (unter 5 Punkten). Das gefährdet das Bestehen, nicht nur den Schnitt." : all <= T ? "Prognose " + de1(all) + ", Ziel " + S.gtarget + " erreicht. Ich bin … zufrieden. Nicht weitersagen." : "Prognose " + de1(all) + ". Für " + S.gtarget + " fehlen " + de2(Math.max(0, need - r.pd + .01)) + " Punkte im Schnitt. Machbar, Sir, wenn wir anfangen.";
+  $("g-need").innerHTML = ""; $("g-need").append("Für " + S.gtarget + " braucht Berlin einen Punkteschnitt ", el("b", null, "über " + de2(need)), ", also im Mittel " + tp + " Punkte je Fach. " + (r ? "Gezählt: " + r.n + " von " + SUBJECTS.length + " Fächern." : ""));
+  const box = $("subj"); box.innerHTML = ""; const cur = hjOf();
   SUBJECTS.forEach((f, i) => {
-    const g = S.grades.filter(x => x.fach === f), a = subjAvg(f), c = el("div", "sc"); c.style.animationDelay = (i * 40) + "ms";
-    const h = el("div", "h"); h.appendChild(el("b", null, f)); const v = el("span", null, a != null ? de1(a) : "–"); v.style.color = a == null ? "var(--muted)" : a <= 1.5 ? "var(--good)" : a <= 2.5 ? "var(--cyan)" : a <= 3.5 ? "var(--amber)" : "var(--bad)"; h.appendChild(v); c.appendChild(h);
-    const gr = el("div", "gr"); g.forEach(x => { const b = el("button", x.art === "Klausur" ? "k" : "", noteLbl(x.note)); b.type = "button"; b.title = x.art + " · " + x.date + " – klicken zum Löschen"; b.addEventListener("click", () => { S.grades = S.grades.filter(y => y.id !== x.id); save(); renderNoten(); renderHud(); }); gr.appendChild(b); }); if (!g.length) gr.appendChild(el("span", "note", "noch keine Noten")); c.appendChild(gr);
-    const ks = g.filter(x => x.art === "Klausur").map(x => x.note), os = g.filter(x => x.art !== "Klausur").map(x => x.note);
-    if (g.length) { const n = ks.length, K = avg(ks) || 0, O = avg(os); const X = O != null ? ((T - (1 - w) * O) / w) * (n + 1) - K * n : T * (n + 1) - K * n;
-      const need = el("div", "need"); if (a <= T) need.textContent = "Ziel " + S.gtarget + " gehalten."; else if (X < .7) need.textContent = "Ziel " + S.gtarget + " mit einer Klausur nicht erreichbar – mündlich nachlegen."; else { need.appendChild(document.createTextNode("Nächste Klausur für Ø " + S.gtarget + ": ")); need.appendChild(el("b", null, "≤ " + de1(Math.min(6, X)))); } c.appendChild(need); }
-    box.appendChild(c);
+    const g = S.grades.filter(x => x.fach === f), c = subjCalc(f), card = el("div", "sc" + (c && c.P < 5 ? " def" : "")); card.style.animationDelay = (i * 40) + "ms";
+    const h = el("div", "h"); h.appendChild(el("b", null, f + (isWritten(f) ? " ✎" : ""))); const pv = el("div", "pts"); const v = el("span", null, c ? String(c.P) : "–"); v.style.color = !c ? "var(--muted)" : c.P >= 13 ? "var(--good)" : c.P >= 10 ? "var(--cyan)" : c.P >= 5 ? "var(--amber)" : "var(--bad)"; v.textContent = c ? c.P + " P" : "–"; pv.append(v, el("small", null, c ? "Note " + c.note + " · H " + de1(c.H) : "Punkte")); h.appendChild(pv); card.appendChild(h);
+    const hj = el("div", "hjs"); HJS.forEach(H => { const hc = hjCalc(f, H), lb = el("label", null, H + (hc && !hc.z ? " ≈" + hc.v : "")), sel = ptsSelect(S.zeug[f + "|" + H], hc && !hc.z ? "auto" : "–"); if (hc && hc.z) sel.classList.add("ovr"); sel.title = "Echte Zeugnispunkte " + H + " (leer = aus Einzelnoten berechnet)"; sel.addEventListener("change", () => { if (sel.value === "") delete S.zeug[f + "|" + H]; else S.zeug[f + "|" + H] = Number(sel.value); save(); renderNoten(); renderHud(); }); lb.appendChild(sel); hj.appendChild(lb); }); card.appendChild(hj);
+    const gr = el("div", "gr"); g.forEach(x => { const b = el("button", x.art === "Klassenarbeit" ? "k" : "", x.pts + "P"); b.type = "button"; b.title = x.art + " · " + x.hj + " · " + x.date + " – klicken zum Löschen"; b.addEventListener("click", () => { S.grades = S.grades.filter(y => y.id !== x.id); save(); renderNoten(); renderHud(); }); gr.appendChild(b); }); if (!g.length) gr.appendChild(el("span", "note", "noch keine Einzelnoten")); card.appendChild(gr);
+    const ex = el("div", "exr"); ex.appendChild(el("span", null, "Prüfung:")); const e = S.pruef[f] || {};
+    [["s", "schriftl.", isWritten(f)], ["m", "mündl.", true]].forEach(([k, l, show]) => { if (!show) return; const lb = el("label", null, l), sel = ptsSelect(e[k], "–"); sel.addEventListener("change", () => { S.pruef[f] = Object.assign({}, S.pruef[f], { [k]: sel.value === "" ? null : Number(sel.value) }); save(); renderNoten(); renderHud(); }); lb.appendChild(sel); ex.appendChild(lb); }); card.appendChild(ex);
+    if (c && c.P < 5) card.appendChild(el("div", "warn", "Defizit: unter 5 Punkten gefährdet das Bestehen."));
+    const nd = el("div", "need"); const cg = S.grades.filter(x => x.fach === f && x.hj === cur), Kp = cg.filter(x => x.art === "Klassenarbeit").map(x => x.pts), Op = cg.filter(x => x.art !== "Klassenarbeit").map(x => x.pts);
+    if (S.zeug[f + "|" + cur] == null && (Kp.length || Op.length)) { const n1 = Kp.length + 1, w = n1 === 1 ? 1 / 3 : .5, sumK = Kp.reduce((a, b) => a + b, 0), goal = tp - .5, x = Op.length ? ((goal - (1 - w) * avg(Op)) / w) * n1 - sumK : goal * n1 - sumK;
+      if (x <= 0) nd.textContent = cur + ": " + tp + " Punkte sind gesichert, solange nichts abstürzt."; else if (x > 15) nd.textContent = cur + ": " + tp + " Punkte nicht allein über die nächste Klassenarbeit, mündlich nachlegen."; else { nd.append(cur + ": nächste Klassenarbeit für " + tp + " Punkte: "); nd.appendChild(el("b", null, "≥ " + Math.ceil(x) + " P")); } card.appendChild(nd); }
+    box.appendChild(card);
   });
   renderTodos();
 }
@@ -2001,7 +2066,8 @@ function overview() {
     klausuren: allExams().map(e => ({ fach: e.fach, datum: e.date, in_tagen: dDays(e.date), stunde: e.std || "", thema: e.thema || "", datum_unsicher: !!e.check })), termine: EVENTS.filter(([d]) => dDays(d) >= 0).slice(0, 5).map(([d, t]) => d + " " + t),
     quiz: { fragen: S.stats.total, quote: S.stats.total ? Math.round(S.stats.right / S.stats.total * 100) + "%" : "–", je_fach: Object.fromEntries(Object.entries(S.stats.topics).map(([k, v]) => [k, Math.round(v.right / v.total * 100) + "% von " + v.total])) },
     fehlerheft: Object.values(S.err).slice(0, 8).map(v => v.t + ": " + v.q + " → " + v.a), todos_offen: S.todos.filter(t => !t.done).map(t => ({ id: t.id, text: t.text, faellig: t.due, fach: t.fach })),
-    noten: Object.fromEntries(SUBJECTS.map(f => [f, subjAvg(f)]).filter(([, v]) => v != null).map(([f, v]) => [f, Math.round(v * 10) / 10])), gesamt_schnitt: overallAvg() ? Math.round(overallAvg() * 10) / 10 : null, ziel: S.gtarget,
+    noten_punkte: Object.fromEntries(SUBJECTS.map(f => [f, subjCalc(f)]).filter(([, v]) => v).map(([f, v]) => [f, { abschluss_punkte_P: v.P, endnote: v.note, halbjahresschnitt_H: v.H, halbjahre: Object.fromEntries(HJS.map((h, i) => [h, v.hs[i] ? v.hs[i].v : null])) }])),
+    fachabi_prognose: (() => { const r = fachabi(); return r ? { durchschnittsnote: r.note, punkteschnitt: r.pd, defizite: r.def, hinweis: "Berechnung nach APO-FOS Berlin Anlage 7.1; Ziel " + S.gtarget + " braucht Punkteschnitt über " + pdNeeded(parseFloat(S.gtarget.replace(",", "."))) } : null; })(), ziel: S.gtarget,
     fokus_heute: S.focus.n + " Blöcke", lernserie: streakDays() + " Tage", level: lvlOf(S.xp).l, wichtige_mails_geladen: mails.filter(m => m.cat.p <= 2).slice(0, 6).map(m => ({ id: m.id, kategorie: m.cat.n, von: m.name, betreff: m.subject })) };
 }
 function makeTools() {
@@ -2031,7 +2097,7 @@ function makeTools() {
     T("add_exam", "Trägt eine Klausur ein oder korrigiert ein Datum (ersetzt den bekannten Termin desselben Fachs). date im Format JJJJ-MM-TT.", { fach: { type: "string" }, date: { type: "string" }, thema: { type: "string" } }, ["fach", "date"], i => "Klausur eintragen: " + i.fach, async i => addExam(String(i.fach), String(i.date), i.thema ? String(i.thema) : "")),
     T("add_todo", "Legt eine Aufgabe/Hausaufgabe in der To-do-Liste an. due optional JJJJ-MM-TT, fach optional (eines der 8 Fächer).", { text: { type: "string" }, due: { type: "string" }, fach: { type: "string" } }, ["text"], i => "To-do: " + String(i.text || "").slice(0, 40), async i => addTodo(i.text, i.due ? String(i.due) : "", i.fach ? String(i.fach) : "")),
     T("complete_todo", "Hakt eine Aufgabe ab. id aus get_overview.", { id: { type: "string" } }, ["id"], "Aufgabe abhaken", async i => { const t = S.todos.find(x => x.id === String(i.id)); if (!t) throw new Error("Aufgabe nicht gefunden"); t.done = true; save(); renderTodos(); renderHud(); return "Erledigt: " + t.text; }),
-    T("add_grade", "Trägt eine erhaltene Note ein. note als Zahl 1–6 (Tendenzen: 1- = 1.3, 2+ = 1.7). art: Klausur, Test, Mündlich oder Sonstige.", { fach: { type: "string" }, note: { type: "number" }, art: { type: "string" } }, ["fach", "note"], i => "Note eintragen: " + i.fach + " " + i.note, async i => addGrade(i.fach, i.note, String(i.art || "Sonstige"))),
+    T("add_grade", "Trägt eine erhaltene Leistung ein. Bevorzugt punkte (Notenpunkte 0–15, z. B. 2- = 10, 1+ = 15). Alternativ note 1–6 (Tendenzen 1- = 1.3), wird in Punkte umgerechnet. art: Klassenarbeit, Test, Mündlich oder Sonstige. halbjahr: 11/1, 11/2, 12/1 oder 12/2 (Standard: aktuelles).", { fach: { type: "string" }, punkte: { type: "number" }, note: { type: "number" }, art: { type: "string" }, halbjahr: { type: "string" } }, ["fach"], i => "Leistung eintragen: " + i.fach + " " + (i.punkte != null ? i.punkte + " P" : i.note), async i => addGrade(i.fach, i.punkte, String(i.art || "Sonstige"), i.halbjahr, i.note)),
     T("create_quiz", "Erstellt ein interaktives Multiple-Choice-Quiz im Trainingsbereich. 3–10 Fragen, je genau eine richtige und drei plausible falsche Antworten, FOS-11-Niveau, fachlich korrekt. Der Schüler startet es per Knopf unter deiner Antwort.", { fach: { type: "string" }, thema: { type: "string" }, fragen: { type: "array", items: { type: "object", properties: { frage: { type: "string" }, richtig: { type: "string" }, falsch: { type: "array", items: { type: "string" } }, erklaerung: { type: "string" } }, required: ["frage", "richtig", "falsch"] } } }, ["fach", "fragen"], i => "Quiz bauen: " + i.fach, async i => {
       const qs = (Array.isArray(i.fragen) ? i.fragen : []).filter(f => f && f.frage && f.richtig && Array.isArray(f.falsch) && f.falsch.length >= 3).slice(0, 10).map(f => ({ q: String(f.frage), o: [String(f.richtig)].concat(f.falsch.slice(0, 3).map(String)), e: String(f.erklaerung || "") }));
       if (!qs.length) throw new Error("Keine gültigen Fragen"); const fach = SUBJECTS.find(s => s.toLowerCase() === String(i.fach).toLowerCase()) || String(i.fach); curExtras.push({ type: "quiz", fach, thema: String(i.thema || ""), questions: qs }); unlock("ki"); return qs.length + " Fragen bereit – Knopf erscheint unter der Antwort."; }),
@@ -3004,7 +3070,7 @@ function boot() {
   const iv = setInterval(() => { if (i < lines.length) { const d = el("div", null, lines[i] + " "); d.appendChild(el("span", "ok", "✓")); box.appendChild(d); i++; $("boot-pct").textContent = Math.round(i / lines.length * 100) + "%"; } else { clearInterval(iv); clearInterval(hx); setTimeout(done, 250); } }, 220);
   $("boot-skip").addEventListener("click", () => { clearInterval(iv); clearInterval(hx); done(); });
 }
-function renderAll() { applyTheme(); applyPerf(); renderMissions(); renderMem(); renderKB(); renderStats(); renderXP(); renderAch(); refreshExamViews(); tRender(); renderBrief(); syncToggles(); renderHeat(); renderNoten(); syncOpts(); renderCard(); $("g-target").value = S.gtarget; $("g-w").value = String(S.gw); }
+function renderAll() { applyTheme(); applyPerf(); renderMissions(); renderMem(); renderKB(); renderStats(); renderXP(); renderAch(); refreshExamViews(); tRender(); renderBrief(); syncToggles(); renderHeat(); renderNoten(); syncOpts(); renderCard(); $("g-target").value = S.gtarget; $("g-pf4").value = S.pf4 || ""; }
 addEventListener("resize", () => { sizeCanvases(); moveInd(); });
 if (innerWidth < 520) $("prompt").placeholder = "Jarvis fragen … / = Befehle";
 sizeCanvases(); renderAll(); renderStarters(); nextQuestion(); clock();
