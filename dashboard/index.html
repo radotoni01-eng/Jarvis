@@ -697,6 +697,30 @@ details.rv div { margin-top: 4px; }
 @media (pointer: coarse) { #cursor { display: none; } }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } #cursor { display: none; } }
 
+/* ============ v8: Werkstatt ============ */
+#v-werkstatt { grid-template-columns: 1.35fr 1fr; }
+@media (max-width: 980px) { #v-werkstatt { grid-template-columns: 1fr; } }
+.ess-top { gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 8px; } .ess-top .bl-time { margin-left: auto; font-size: 22px; }
+.ess-text { width: 100%; min-height: 260px; resize: vertical; margin-top: 8px; line-height: 1.6; font-size: 15px; font-family: var(--sans, inherit); }
+.ess-stats { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin: 8px 0; } .ess-stats div { border: 1px solid var(--line); padding: 6px; text-align: center; display: grid; } .ess-stats b { font-family: var(--mono); font-size: 18px; color: var(--cyan); font-weight: 400; } .ess-stats span { font-size: 10px; color: var(--muted); font-family: var(--mono); letter-spacing: .08em; text-transform: uppercase; }
+@media (max-width: 520px) { .ess-stats { grid-template-columns: repeat(3, 1fr); } }
+.ess-tips { margin: 4px 0 10px; padding-left: 18px; font-size: 13px; color: var(--amber); display: grid; gap: 3px; }
+.ess-res { margin-top: 14px; border-top: 1px solid var(--line); padding-top: 12px; }
+.ess-big { display: grid; place-items: center; width: 110px; height: 110px; border: 2px solid var(--cyan); border-radius: 50%; box-shadow: 0 0 24px rgba(var(--p),.3) inset; } .ess-big b { font-family: var(--display); font-size: 42px; line-height: 1; } .ess-big span { font-family: var(--mono); font-size: 10px; color: var(--muted); }
+.ess-bars { display: grid; gap: 6px; } .ess-bar { display: grid; grid-template-columns: 70px 1fr 26px; gap: 8px; align-items: center; font-size: 12px; font-family: var(--mono); color: var(--muted); } .ess-bar > div { height: 6px; background: rgba(var(--p),.12); } .ess-bar i { display: block; height: 100%; background: linear-gradient(90deg, rgb(var(--p)), rgb(var(--a))); transition: width .8s cubic-bezier(.2,.8,.2,1); } .ess-bar b { color: var(--text); text-align: right; }
+.ess-fazit { margin: 6px 0 0; font-style: italic; color: var(--text); }
+.ess-list { padding-left: 18px; margin: 4px 0; display: grid; gap: 4px; font-size: 13.5px; } .ess-list.ok li::marker { color: var(--good); } .ess-list.bad li::marker { color: var(--amber); } .ess-list.err b { font-family: var(--mono); font-size: 11px; color: var(--bad); margin-right: 4px; }
+.ess-marked { white-space: pre-wrap; font-size: 14px; line-height: 1.7; padding: 10px 12px; border: 1px solid var(--line); background: rgba(4,9,15,.5); max-height: 320px; overflow: auto; }
+.ess-marked mark { background: rgba(255,107,122,.22); color: inherit; border-bottom: 2px solid var(--bad); cursor: help; padding: 0 1px; } .ess-marked mark[data-t="Inhalt"], .ess-marked mark[data-t="Struktur"] { background: rgba(var(--a),.2); border-color: var(--amber); }
+.ess-better s { display: block; color: var(--muted); font-size: 13px; } .ess-better p { margin: 4px 0 0; color: var(--good); }
+.ess-next { margin-top: 10px; font-size: 14px; } .ess-next b { color: var(--amber); }
+.drill .ans { grid-template-columns: 1fr; } .drill-q { border: 1px solid var(--line); padding: 14px; margin-bottom: 10px; background: linear-gradient(160deg, rgba(var(--p),.08), transparent); } .drill-q small { font-family: var(--mono); font-size: 11px; color: var(--muted); letter-spacing: .12em; text-transform: uppercase; } .drill-q p { margin: 6px 0 0; font-size: 17px; }
+.drill-info { margin: 10px 0 8px; font-size: 13.5px; color: var(--text); }
+.ph-list { list-style: none; padding: 0; margin: 10px 0; display: grid; gap: 4px; } .ph-list li { display: flex; align-items: center; gap: 6px; padding: 6px 8px; border: 1px solid var(--line); } .ph-list li span { flex: 1; font-size: 14px; }
+.chip-btn.on { border-color: var(--cyan); background: rgba(var(--p),.18); color: var(--cyan); }
+.plan-day { border-left: 2px solid var(--line); padding: 4px 0 8px 12px; margin-bottom: 6px; } .plan-day.today { border-left-color: var(--amber); }
+.plan-h { display: flex; justify-content: space-between; gap: 8px; font-family: var(--mono); font-size: 12px; margin-bottom: 4px; } .plan-h b { color: var(--cyan); font-weight: 400; text-transform: uppercase; letter-spacing: .1em; } .plan-h span { color: var(--muted); }
+.plan-it { display: grid; grid-template-columns: auto 1fr auto; gap: 10px; align-items: center; padding: 6px 8px; border: 1px solid var(--line); margin: 4px 0; cursor: pointer; } .plan-it input { width: 18px; height: 18px; accent-color: var(--good); } .plan-it small { display: block; font-family: var(--mono); font-size: 10.5px; color: var(--muted); } .plan-it span { font-size: 13.5px; } .plan-it.done { opacity: .55; } .plan-it.done span { text-decoration: line-through; }
 /* ============ v6: Performance & saubere Animationen ============ */
 .panel, #pal { -webkit-backdrop-filter: none !important; backdrop-filter: none !important; }
 :root { --panel: rgba(8, 21, 36, 0.93); }
@@ -799,7 +823,7 @@ body.hid *, body.hid *::before, body.hid *::after { animation-play-state: paused
   <div id="set-restore" hidden><textarea class="inp" id="set-restore-in" rows="4" style="width:100%;margin-top:8px" placeholder="Backup-Text hier einfügen …" aria-label="Backup einfügen"></textarea><button class="btn sm amber" id="set-restore-go" type="button" style="margin-top:6px">Wiederherstellen</button></div>
   <div class="row"><button class="btn sm ghost" id="set-reset" type="button">Alles zurücksetzen …</button></div>
   <div id="set-reset-c" hidden class="note">Wirklich alles löschen – Fortschritt, Chats, Noten, Wissensbasis, Gedächtnis? <button class="btn sm" id="set-reset-go" type="button" style="border-color:var(--bad);color:var(--bad);margin-top:6px">Ja, alles löschen</button></div>
-  <p class="note" style="margin-top:18px">Kürzel: Strg+K Befehle · F1–F6 Ansichten · / Befehle im Chat · Esc stoppt oder schließt.</p>
+  <p class="note" style="margin-top:18px">Kürzel: Strg+K Befehle · F1–F7 Ansichten · / Befehle im Chat · Esc stoppt oder schließt.</p>
 </div>
 
 <div class="wrap">
@@ -838,6 +862,7 @@ body.hid *, body.hid *::before, body.hid *::after { animation-play-state: paused
     <button role="tab" data-v="labor" aria-selected="false"><span class="ico" aria-hidden="true">⚗</span><span class="k">F4</span>Labor</button>
     <button role="tab" data-v="comms" aria-selected="false"><span class="ico" aria-hidden="true">✉</span><span class="k">F5</span>Comms<span class="badge" id="mail-badge" hidden>0</span></button>
     <button role="tab" data-v="noten" aria-selected="false"><span class="ico" aria-hidden="true">Ø</span><span class="k">F6</span>Noten</button>
+    <button role="tab" data-v="werkstatt" aria-selected="false"><span class="ico" aria-hidden="true">✍</span><span class="k">F7</span>Werkstatt</button>
     <span class="ind" id="tab-ind"></span>
   </nav>
 
@@ -1091,6 +1116,31 @@ body.hid *, body.hid *::before, body.hid *::after { animation-play-state: paused
     </div>
   </section>
 
+  <!-- ================= WERKSTATT ================= -->
+  <section class="view" id="v-werkstatt" hidden>
+    <div class="col">
+      <div class="panel">
+        <h2>Aufsatz-Werkstatt <small>Erörterung · Comment · KI-Korrektur</small></h2>
+        <div id="essay"></div>
+      </div>
+      <div class="panel">
+        <h2>Phrasen-Tresor <small>Redemittel DE · EN</small></h2>
+        <div id="phrasen"></div>
+      </div>
+    </div>
+    <div class="col">
+      <div class="panel">
+        <h2>Lernplan · 7 Tage <small id="plan-count"></small></h2>
+        <div id="plan"></div>
+        <p class="note">Automatisch aus Ihrem Wochenplan und den Klausuren nach den Klausurmodus-Regeln. Abhaken = +10 XP.</p>
+      </div>
+      <div class="panel drill">
+        <h2>Drill <small>Stilmittel · Operatoren · Linking words</small></h2>
+        <div id="drill"></div>
+      </div>
+    </div>
+  </section>
+
   <!-- ================= COMMS ================= -->
   <section class="view" id="v-comms" hidden>
     <div class="panel">
@@ -1166,7 +1216,7 @@ body.hid *, body.hid *::before, body.hid *::after { animation-play-state: paused
     </div>
   </section>
 </div>
-<footer>Jarvis · FOS22.1 AS · Termine aus „Fahrplan 1,5“ + Ihre Korrekturen · <span id="sync-state">Fortschritt: lokal</span> · <span class="kbd">Strg</span>+<span class="kbd">K</span> Befehle · <span class="kbd">F1</span>–<span class="kbd">F6</span> Ansichten</footer>
+<footer>Jarvis · FOS22.1 AS · Termine aus „Fahrplan 1,5“ + Ihre Korrekturen · <span id="sync-state">Fortschritt: lokal</span> · <span class="kbd">Strg</span>+<span class="kbd">K</span> Befehle · <span class="kbd">F1</span>–<span class="kbd">F7</span> Ansichten</footer>
 
 <script>
 (() => {
@@ -1262,6 +1312,7 @@ const TERMS = [
   ["Sozialkunde", "Volkssouveränität", "Alle Staatsgewalt geht vom Volke aus (Art. 20 Abs. 2 GG)."]
 ];
 const ACH = [
+  ["essay", "✍", "Schreibtischtäter", "Einen Aufsatz korrigieren lassen."], ["essay13", "✒", "Federführend", "13+ Punkte in der Aufsatz-Werkstatt."], ["drill10", "D", "Drillmaster", "10 richtige in Folge im Drill."], ["plan", "▦", "Planerfüller", "Einen Lernplan-Block abgehakt."],
   ["first", "1", "Erster Treffer", "Die erste Frage richtig beantwortet."], ["s5", "5", "Fünferserie", "5 richtige am Stück."], ["s10", "10", "Unaufhaltsam", "10 richtige am Stück."],
   ["q50", "50", "Fleißmaschine", "50 Fragen beantwortet."], ["q200", "200", "Dauerbrenner", "200 Fragen beantwortet."], ["f1", "F", "Fokussiert", "Einen Fokusblock abgeschlossen."],
   ["f5", "F5", "Tiefenfokus", "5 Fokusblöcke abgeschlossen."], ["b10", "⚡", "Blitzmerker", "10 Treffer in einer Blitzrunde."], ["ki", "✦", "KI-Pilot", "KI-Fragen erzeugt."],
@@ -1479,7 +1530,7 @@ function logAct(txt) { logItems.unshift([hhmm(new Date()), txt]); logItems.lengt
 function setPill(id, st, label) { const p = $(id); p.className = "sp " + (st || ""); if (label) p.lastChild.textContent = label; }
 
 /* ================= ANSICHTEN ================= */
-const VIEWS = ["jarvis", "zentrale", "training", "labor", "comms", "noten"];
+const VIEWS = ["jarvis", "zentrale", "training", "labor", "comms", "noten", "werkstatt"];
 let curView = "jarvis";
 function show(v, quiet) {
   if (!VIEWS.includes(v)) v = "jarvis";
@@ -1495,6 +1546,7 @@ function show(v, quiet) {
   if (v === "noten") renderNoten();
   if (v === "zentrale") { renderHeat(); renderMissions(); }
   if (v === "labor") laborShow();
+  if (v === "werkstatt") werkstattShow();
   if (v === "jarvis" && fine) setTimeout(() => $("prompt").focus({ preventScroll: true }), 50);
 }
 function moveInd() { const b = document.querySelector('nav.tabs button[aria-selected="true"]'); if (!b) return; $("tab-ind").style.left = b.offsetLeft + "px"; $("tab-ind").style.width = b.offsetWidth + "px"; }
@@ -2109,7 +2161,7 @@ function makeTools() {
       const fach = SUBJECTS.find(s => s.toLowerCase() === String(i.fach).toLowerCase()) || String(i.fach); const ks = (Array.isArray(i.karten) ? i.karten : []).filter(k => k && k.vorne && k.hinten).slice(0, 20);
       if (!ks.length) throw new Error("Keine Karten"); ks.forEach(k => S.deck.push({ k: "u:" + uid(), t: fach, f: String(k.vorne).slice(0, 300), a: String(k.hinten).slice(0, 500), e: "" })); save(); curExtras.push({ type: "cards", fach, n: ks.length }); return ks.length + " Karten gespeichert."; }),
     T("start_focus", "Startet den Fokus-Timer (Pomodoro). minutes 5–90, Standard 25.", { minutes: { type: "number" } }, null, i => "Fokus-Timer " + (Number(i.minutes) || 25) + " min", async i => { startTimer(Number(i.minutes) || 25); return "Timer läuft: " + Math.round(tTotal / 60) + " Minuten."; }),
-    T("open_view", "Öffnet nach deiner Antwort eine Ansicht der Lernzentrale: zentrale, training, comms, noten.", { view: { type: "string" } }, ["view"], i => "Ansicht vormerken: " + i.view, async i => { const v = String(i.view).toLowerCase(); if (!VIEWS.includes(v) || v === "jarvis") throw new Error("Unbekannte Ansicht"); pendingNav = v; curExtras.push({ type: "nav", view: v }); return "Wird nach der Antwort geöffnet."; }),
+    T("open_view", "Öffnet nach deiner Antwort eine Ansicht der Lernzentrale: zentrale, training, labor, comms, noten, werkstatt (Aufsatz-Korrektur, Stilmittel/Operatoren-Drill, Phrasen, 7-Tage-Lernplan).", { view: { type: "string" } }, ["view"], i => "Ansicht vormerken: " + i.view, async i => { const v = String(i.view).toLowerCase(); if (!VIEWS.includes(v) || v === "jarvis") throw new Error("Unbekannte Ansicht"); pendingNav = v; curExtras.push({ type: "nav", view: v }); return "Wird nach der Antwort geöffnet."; }),
     T("save_document", "Bereitet ein Dokument (Lernzettel, Zusammenfassung, Lernplan) in Markdown vor. Der Schüler kann es per Knopf in Claude Docs speichern, herunterladen oder kopieren. Nutze das für alles, was er behalten soll.", { title: { type: "string" }, markdown: { type: "string" } }, ["title", "markdown"], i => "Dokument: " + String(i.title || "").slice(0, 40), async i => { const t = String(i.title || "Lernzettel").replace(/[\u0000-\u001f]/g, " ").slice(0, 120), m = String(i.markdown || "").slice(0, 30000); if (!m.trim()) throw new Error("Leeres Dokument"); curExtras.push({ type: "doc", title: t, markdown: m }); return "Dokument vorbereitet."; }),
     T("remember", "Speichert eine dauerhafte Erinnerung über den Schüler (Ziele, Vorlieben, Schwächen, wichtige Fakten), die in allen künftigen Gesprächen bekannt ist. Nur echte, dauerhafte Infos; ein kurzer Satz.", { fakt: { type: "string" } }, ["fakt"], i => "Merken: " + String(i.fakt || "").slice(0, 40), async i => addMem(String(i.fakt || ""), "Jarvis")),
     T("search_knowledge", "Durchsucht die Wissensbasis des Schülers (seine hochgeladenen Unterlagen: Themenlisten, Arbeitsblätter, Mitschriften) nach passenden Textstellen. Gibt die besten Abschnitte mit Quelle zurück.", { query: { type: "string" }, fach: { type: "string" } }, ["query"], i => "Wissensbasis: " + String(i.query || "").slice(0, 36), async i => { const r = kbSearch(String(i.query || ""), i.fach ? String(i.fach) : "", 5); return { kurz: r.length ? r.length + " Abschnitte" : "keine Treffer", treffer: r.map(x => ({ quelle: x.name, fach: x.fach, text: x.text })) }; }),
@@ -2278,7 +2330,7 @@ addEventListener("keydown", e => {
   if (e.key === "Escape" && !$("vm").hidden) { vmClose(); return; }
   if (e.key === "Escape" && !$("breath").hidden) { brClose(); return; }
   if (e.key === "Escape" && !$("set").hidden) { setClose(); return; }
-  if (/^F[1-6]$/.test(e.key)) { e.preventDefault(); show(VIEWS[+e.key[1] - 1]); return; }
+  if (/^F[1-7]$/.test(e.key)) { e.preventDefault(); show(VIEWS[+e.key[1] - 1]); return; }
   if (e.target.matches("input, textarea, select")) return;
   if (e.key === "/" && curView === "jarvis") { e.preventDefault(); $("prompt").focus(); $("prompt").value = "/"; updateSlash(); return; }
   if (curView !== "training") return;
@@ -3071,12 +3123,14 @@ document.addEventListener("touchend", e => {
 document.addEventListener("click", e => { if (e.target.closest("[data-breath]")) brOpen(); });
 $("prompt").addEventListener("focus", () => { if (!fine) setTimeout(() => $("composer").scrollIntoView({ block: "end", behavior: "smooth" }), 320); });
 ["Gedächtnis", "Wissensbasis", "Funktionen plotten", "Vokabeln", "Sprachchat"].forEach(c => $("caps").appendChild(el("span", "chip c", c)));
-CMDS.push(["Sprachchat starten", "sprechen voice", () => { show("jarvis"); vmOpen(); }], ["Atem-Modus", "atmen ruhe nervös", () => brOpen()], ["Einstellungen", "settings stimme", () => setOpen()],
+CMDS.push(["Werkstatt", "F7 aufsatz erörterung", () => show("werkstatt")], ["Aufsatz korrigieren", "aufsatz essay comment", () => { show("werkstatt"); setTimeout(() => $("ess-text") && $("ess-text").focus(), 80); }], ["Stilmittel-Drill", "stilmittel deutsch", () => { show("werkstatt"); drill.mode = "stil"; drillNext(); }], ["Operatoren-Drill", "operatoren afb", () => { show("werkstatt"); drill.mode = "op"; drillNext(); }], ["Lernplan 7 Tage", "plan woche", () => show("werkstatt")],
+  ["Sprachchat starten", "sprechen voice", () => { show("jarvis"); vmOpen(); }], ["Atem-Modus", "atmen ruhe nervös", () => brOpen()], ["Einstellungen", "settings stimme", () => setOpen()],
   ["Mathe-Labor", "plot funktion", () => show("labor")], ["Vokabel-Trainer", "vokabeln englisch", () => { show("labor"); setTimeout(() => $("voc-card").scrollIntoView({ behavior: still ? "auto" : "smooth", block: "center" }), 300); }],
   ["Blurting-Arena", "blurting", () => { show("labor"); setTimeout(() => $("blurt").scrollIntoView({ behavior: still ? "auto" : "smooth", block: "center" }), 300); }],
   ["Klausur-Simulator", "simulation klausur", () => { show("labor"); setTimeout(() => $("sim").scrollIntoView({ behavior: still ? "auto" : "smooth", block: "center" }), 300); }],
   ["Wissensbasis", "wissen unterlagen", () => { show("jarvis"); sideTab("kb"); openDrawer(); }], ["Gedächtnis", "memory merken", () => { show("jarvis"); sideTab("mem"); openDrawer(); }]);
 SLASH.splice(SLASH.length - 1, 0,
+  ["/werkstatt", "Werkstatt: Aufsatz, Drill, Phrasen, Lernplan", false, () => show("werkstatt")], ["/aufsatz", "Aufsatz schreiben und korrigieren lassen", false, () => { show("werkstatt"); setTimeout(() => $("ess-text") && $("ess-text").focus(), 80); }], ["/stilmittel", "Stilmittel-Drill", false, () => { show("werkstatt"); drill.mode = "stil"; drillNext(); }], ["/plan", "7-Tage-Lernplan", false, () => show("werkstatt")],
   ["/sprechen", "Sprachchat starten", false, () => vmOpen()], ["/atmen", "Atem-Modus gegen Prüfungsstress", false, () => brOpen()],
   ["/merken", "Jarvis etwas merken lassen (z. B. /merken ich lerne abends)", true, a => { if (a) addMem(a, "Sie"); else { sideTab("mem"); openDrawer(); } }],
   ["/plot", "Funktion plotten (z. B. /plot x^2-4)", true, a => { show("labor"); plotSet(a || "x^2-5x+6", ""); }],
@@ -3093,6 +3147,276 @@ function boot() {
   const iv = setInterval(() => { if (i < lines.length) { const d = el("div", null, lines[i] + " "); d.appendChild(el("span", "ok", "✓")); box.appendChild(d); i++; $("boot-pct").textContent = Math.round(i / lines.length * 100) + "%"; } else { clearInterval(iv); clearInterval(hx); setTimeout(done, 250); } }, 220);
   $("boot-skip").addEventListener("click", () => { clearInterval(iv); clearInterval(hx); done(); });
 }
+/* ================= WERKSTATT (F7) ================= */
+const STILMITTEL = [
+  ["Metapher", "„Sie ist die Sonne meines Lebens.“", "bildhafter Ausdruck ohne „wie“ – macht Abstraktes anschaulich, emotionalisiert"],
+  ["Vergleich", "„Er kämpft wie ein Löwe.“", "Verbindung mit „wie/als“ – veranschaulicht, betont eine Eigenschaft"],
+  ["Personifikation", "„Die Sonne lacht vom Himmel.“", "Dinge/Natur erhalten menschliche Züge – lebendig, nahbar"],
+  ["Anapher", "„Ich will leben. Ich will lieben. Ich will frei sein.“", "Wiederholung am Satzanfang – eindringlich, rhythmisch, betont"],
+  ["Epipher", "„Was er sagt, ist Lüge. Was er tut, ist Lüge.“", "Wiederholung am Satzende – verstärkt die Kernaussage"],
+  ["Alliteration", "„Milch macht müde Männer munter.“", "gleicher Anlaut – einprägsam, klanglich auffällig (Werbung!)"],
+  ["Hyperbel", "„Ich habe dir das schon tausendmal gesagt.“", "starke Übertreibung – verdeutlicht Emotion oder Dringlichkeit"],
+  ["Rhetorische Frage", "„Wer will schon freiwillig verlieren?“", "Frage ohne erwartete Antwort – lenkt den Leser, wirkt suggestiv"],
+  ["Antithese", "„Der Geist ist willig, aber das Fleisch ist schwach.“", "Gegenüberstellung von Gegensätzen – zeigt Spannung/Konflikt"],
+  ["Parallelismus", "„Der Vater sitzt am Tisch, die Mutter steht am Herd.“", "gleicher Satzbau – ordnet, verstärkt, rhythmisiert"],
+  ["Chiasmus", "„Die Kunst ist lang, und kurz ist unser Leben.“", "Überkreuzstellung (ab–ba) – hebt Gegensatz kunstvoll hervor"],
+  ["Klimax", "„Es gibt Gutes, Besseres und Bestes.“", "Steigerung – baut Spannung auf, betont das letzte Glied"],
+  ["Ellipse", "„Je früher, desto besser.“", "unvollständiger Satz – knapp, umgangssprachlich, dynamisch"],
+  ["Euphemismus", "„Er ist von uns gegangen.“", "Beschönigung – mildert Unangenehmes ab oder verschleiert"],
+  ["Ironie", "„Na, das hast du ja toll hingekriegt!“ (nach einem Missgeschick)", "Gesagtes meint das Gegenteil – Kritik, Spott, Distanz"],
+  ["Neologismus", "„unkaputtbar“", "Wortneuschöpfung – auffällig, modern, prägnant"],
+  ["Oxymoron", "„bittersüß“", "Verbindung widersprüchlicher Begriffe – erzeugt Spannung, Nachdenken"],
+  ["Pleonasmus", "„ein weißer Schimmel“", "überflüssige Doppelung der Bedeutung – Betonung (oft unfreiwillig)"],
+  ["Onomatopoesie", "„Die Biene summt, das Feuer knistert.“", "Lautmalerei – macht Geräusche hörbar, lebendig"],
+  ["Inversion", "„Groß war die Freude.“", "ungewöhnliche Wortstellung – hebt das vorangestellte Wort hervor"],
+  ["Symbol", "„Die weiße Taube auf dem Plakat“ (für Frieden)", "konkretes Ding steht für abstrakte Idee – verdichtet Bedeutung"],
+  ["Synästhesie", "„schreiende Farben“", "Vermischung von Sinneseindrücken – intensiv, ausdrucksstark"],
+  ["Akkumulation", "„Häuser, Straßen, Autos, Menschen – alles war zerstört.“", "Anhäufung von Begriffen – zeigt Fülle/Ausmaß"],
+  ["Asyndeton", "„Ich kam, sah, siegte.“", "Reihung ohne Bindewörter – schnell, drängend"],
+  ["Polysyndeton", "„Und es wallet und siedet und brauset und zischt.“", "Reihung mit vielen Bindewörtern – eindringlich, verlangsamt"],
+  ["Litotes", "„Das war gar nicht schlecht.“", "doppelte Verneinung/Untertreibung – vorsichtige Betonung"],
+  ["Paradoxon", "„Ich weiß, dass ich nichts weiß.“", "scheinbarer Widerspruch mit tieferem Sinn – regt zum Nachdenken an"],
+  ["Zeugma", "„Er hob den Blick und ein Glas Wein.“", "ein Verb bezieht sich auf ungleiche Teile – komisch, überraschend"],
+  ["Pars pro toto", "„ein Dach über dem Kopf haben“ (für Wohnung)", "Teil steht für das Ganze – bildhaft, verkürzend"],
+  ["Anglizismus", "„Das Meeting wurde gecancelt.“", "englisches Wort im Deutschen – modern, jugendlich, teils Imponiergehabe"],
+  ["Imperativ / Appell", "„Handeln Sie jetzt – bevor es zu spät ist!“", "direkte Aufforderung – aktiviert, appelliert an den Leser"],
+  ["Allegorie", "„Justitia mit Waage und Augenbinde“", "ausgestaltetes Bild für abstrakten Begriff (Gerechtigkeit)"]
+];
+const OPERATOREN = [
+  ["nennen", 1, "Informationen ohne Erläuterung knapp aufzählen"],
+  ["beschreiben", 1, "Sachverhalt strukturiert in eigenen Worten wiedergeben"],
+  ["wiedergeben / zusammenfassen", 1, "Inhalt verkürzt und neutral in eigenen Worten darstellen"],
+  ["darstellen", 1, "Zusammenhang geordnet und fachsprachlich aufzeigen"],
+  ["skizzieren", 1, "Sachverhalt in Grundzügen knapp umreißen"],
+  ["erklären", 2, "Sachverhalt auf Ursachen, Regeln oder Theorien zurückführen"],
+  ["erläutern", 2, "erklären UND mit Beispielen oder Belegen veranschaulichen"],
+  ["analysieren", 2, "Material kriteriengeleitet untersuchen und Ergebnisse darlegen"],
+  ["vergleichen", 2, "Gemeinsamkeiten und Unterschiede nach Kriterien ermitteln"],
+  ["einordnen", 2, "Sachverhalt begründet in einen Zusammenhang stellen"],
+  ["anwenden", 2, "Theorie oder Modell auf einen neuen Fall übertragen"],
+  ["herausarbeiten", 2, "aus dem Material Aspekte ermitteln, die nicht direkt genannt sind"],
+  ["charakterisieren", 2, "typische Merkmale und Eigenarten pointiert darstellen"],
+  ["beurteilen", 3, "Aussage an Kriterien prüfen und zu einem begründeten Sachurteil kommen"],
+  ["bewerten", 3, "begründetes Werturteil nach eigenen, offengelegten Maßstäben fällen"],
+  ["erörtern", 3, "Pro und Contra abwägen und begründet Stellung beziehen"],
+  ["Stellung nehmen", 3, "nach Prüfung der Argumente eine begründete eigene Meinung formulieren"],
+  ["entwickeln", 3, "eigene Lösung, Konzept oder Alternative begründet entwerfen"],
+  ["überprüfen", 3, "Aussage oder Hypothese an Fakten/Logik messen und Ergebnis begründen"],
+  ["gestalten", 3, "produktiv-kreativ einen eigenen Text oder Entwurf erstellen"]
+];
+const PHRASEN = {
+  "EN · Introduction": ["This issue has sparked a heated debate.", "Nowadays, more and more people …", "The question of whether … is highly controversial."],
+  "EN · Opinion": ["In my opinion, …", "From my point of view, …", "I am convinced that …", "I strongly believe that …"],
+  "EN · Adding": ["Furthermore, …", "Moreover, …", "In addition, …", "What is more, …"],
+  "EN · Contrast": ["However, …", "Nevertheless, …", "On the other hand, …", "Although …, …"],
+  "EN · Cause & effect": ["Therefore, …", "As a result, …", "Consequently, …", "This is due to …"],
+  "EN · Examples": ["For instance, …", "A case in point is …", "such as …", "This can be illustrated by …"],
+  "EN · Conclusion": ["All things considered, …", "To sum up, …", "In conclusion, …", "Weighing up the arguments, …"],
+  "DE · Einleitung": ["In der aktuellen Debatte um … wird häufig die Frage gestellt, ob …", "Immer wieder sorgt das Thema … für Diskussionen.", "Ob … sinnvoll ist, ist umstritten."],
+  "DE · Argument": ["Für … spricht vor allem, dass …", "Ein gewichtiges Argument ist, dass …", "Dies zeigt sich beispielsweise daran, dass …"],
+  "DE · Gegenargument": ["Dem lässt sich entgegenhalten, dass …", "Kritiker wenden jedoch ein, dass …", "Allerdings darf nicht übersehen werden, dass …"],
+  "DE · Überleitung": ["Darüber hinaus …", "Hinzu kommt, dass …", "Ein weiterer Aspekt ist …", "Neben diesen Gründen …"],
+  "DE · Schluss": ["Abschließend lässt sich festhalten, dass …", "Nach Abwägung der Argumente komme ich zu dem Ergebnis, dass …", "Insgesamt überwiegen meiner Ansicht nach …"]
+};
+const GAPS = [
+  ["The plan is expensive. ___, it could save many lives.", "Nevertheless", ["Therefore", "For instance", "Moreover"]],
+  ["Many teens use social media daily. ___, they are exposed to fake news.", "As a result", ["However", "Although", "To sum up"]],
+  ["Sport is healthy. ___, it helps people to relax.", "Moreover", ["Nevertheless", "Consequently", "Although"]],
+  ["___ the weather was bad, the event was a success.", "Although", ["However", "Therefore", "Furthermore"]],
+  ["Some jobs are underpaid, ___ nurses or care workers.", "such as", ["however", "therefore", "moreover"]],
+  ["___, I believe the advantages clearly outweigh the risks.", "All things considered", ["For instance", "Although", "On the other hand"]],
+  ["Fast food is cheap. ___, it often contains too much sugar and fat.", "On the other hand", ["As a result", "Such as", "In addition"]],
+  ["Smartphones distract students. ___, many schools have banned them.", "Consequently", ["Although", "For instance", "Nevertheless"]],
+  ["Volunteering has many benefits. ___, it helps young people build skills.", "For instance", ["Although", "However", "In conclusion"]],
+  ["___ my point of view, school should start later.", "From", ["In", "At", "By"]]
+];
+const ESSAY_TYPES = {
+  dial: ["Erörterung (dialektisch)", "de", ["Sollte das Handy an Schulen komplett verboten werden?", "Sollte ein soziales Pflichtjahr für alle Schulabgänger eingeführt werden?", "Sollte das Wahlalter bei Bundestagswahlen auf 16 Jahre gesenkt werden?", "Sollten Lebensmittel mit viel Zucker höher besteuert werden?", "Ist Homeoffice für Auszubildende sinnvoll?"]],
+  lin: ["Erörterung (linear)", "de", ["Warum ist ehrenamtliches Engagement für die Gesellschaft wichtig?", "Welche Gründe sprechen für mehr Bewegung im Schulalltag?", "Weshalb sollten Pflegeberufe besser bezahlt werden?", "Warum ist Medienkompetenz heute unverzichtbar?"]],
+  text: ["Textgebundene Erörterung", "de", ["Setzen Sie sich mit der These auseinander: „Soziale Medien machen einsam.“", "Erörtern Sie die Position: „Leistungsdruck in der Schule schadet mehr, als er nützt.“", "Nehmen Sie Stellung zur Aussage: „Gesundheit ist Privatsache.“"]],
+  comment: ["English: Comment", "en", ["Should social media be banned for children under 16?", "Is it a good idea to introduce a four-day school week?", "Should fast food advertising be banned?", "Are young people today too dependent on their smartphones?"]]
+};
+const ESS_STOP = new Set("der die das und ist in zu den von mit sich des auf für nicht ein eine als auch es an werden aus er hat dass sie nach wird bei einer um am sind noch wie einem über einen so zum war haben nur oder aber vor zur bis mehr durch man sein wurde sei kann ich du wir ihr the a an and of to is in that it for on are be as with this by not or have can they their more it's its from at which was will".split(" "));
+const UGS = ["krass", "voll", "halt", "irgendwie", "mega", "eigentlich", "sachen", "dinge", "bisschen", "echt", "total", "kriegen", "okay", "ok", "sozusagen", "gonna", "wanna", "stuff", "kinda"];
+const KONN = { de: ["außerdem", "darüber hinaus", "zudem", "jedoch", "allerdings", "dennoch", "trotzdem", "deshalb", "daher", "folglich", "somit", "beispielsweise", "zum beispiel", "zunächst", "schließlich", "abschließend", "einerseits", "andererseits", "hingegen", "während", "obwohl", "weil", "da ", "denn", "insgesamt", "zusammenfassend"],
+  en: ["furthermore", "moreover", "in addition", "however", "nevertheless", "on the other hand", "although", "therefore", "as a result", "consequently", "for instance", "for example", "such as", "in conclusion", "to sum up", "all things considered", "firstly", "secondly", "finally", "whereas", "because", "due to"] };
+
+S.essays = S.essays || []; S.planDone = S.planDone || {}; S.wst = S.wst || { stil: { r: 0, n: 0, best: 0 }, op: { r: 0, n: 0 }, gap: { r: 0, n: 0 } };
+let ess = { type: S.essDraft && S.essDraft.type || "dial", thema: S.essDraft && S.essDraft.thema || "", res: null, busy: false, t0: 0, lim: 0, iv: 0 };
+const sample3 = (arr, not) => shuffle(arr.filter(x => x !== not)).slice(0, 3);
+
+/* ---- Aufsatz-Werkstatt ---- */
+function essAnalyse(txt, lang) {
+  const t = String(txt || ""), words = (t.match(/[A-Za-zÄÖÜäöüß'-]+/g) || []), wl = words.map(w => w.toLowerCase()), sents = t.split(/[.!?]+(?:\s|$)/).filter(s => s.trim().split(/\s+/).length > 2);
+  const paras = t.split(/\n\s*\n/).filter(p => p.trim().length > 30), low = " " + t.toLowerCase().replace(/\s+/g, " ") + " ";
+  const konn = KONN[lang].filter(k => low.includes(" " + k)), freq = {}; wl.forEach(w => { if (w.length > 3 && !ESS_STOP.has(w)) freq[w] = (freq[w] || 0) + 1; });
+  const rep = Object.entries(freq).filter(([, n]) => n >= 5).sort((a, b) => b[1] - a[1]).slice(0, 4), ugs = UGS.filter(u => wl.includes(u));
+  const avgS = sents.length ? words.length / sents.length : 0, ich = wl.filter(w => w === "ich" || w === "i").length;
+  const tips = [];
+  if (words.length > 40 && paras.length < 3) tips.push("Absätze: Gliedern Sie in Einleitung, Hauptteil (mehrere Absätze) und Schluss. Leerzeile = neuer Absatz.");
+  if (words.length > 120 && konn.length < 4) tips.push("Wenig Verknüpfungen: Nutzen Sie mehr Konnektoren (siehe Phrasen-Tresor).");
+  if (avgS > 26) tips.push("Sätze im Schnitt sehr lang (" + avgS.toFixed(0) + " Wörter) – teilen Sie Schachtelsätze.");
+  if (rep.length) tips.push("Wiederholungen: " + rep.map(([w, n]) => "„" + w + "“ ×" + n).join(", ") + " – Synonyme verwenden.");
+  if (ugs.length) tips.push("Umgangssprache: " + ugs.map(u => "„" + u + "“").join(", ") + " – im Aufsatz vermeiden.");
+  if (words.length > 150 && ich / words.length > .03) tips.push("Viele Ich-Formulierungen – Meinung erst im Schluss deutlich machen, vorher sachlich argumentieren.");
+  return { w: words.length, s: sents.length, p: paras.length, avgS, konn, tips };
+}
+function essSave() { S.essDraft = { type: ess.type, thema: ess.thema, text: ($("ess-text") || {}).value || (S.essDraft && S.essDraft.text) || "" }; save(); }
+function renderEssay() {
+  const box = $("essay"); if (!box) return; box.innerHTML = ""; const T = ESSAY_TYPES[ess.type], lang = T[1];
+  const top = el("div", "row ess-top");
+  const sel = el("select", "sel"); Object.entries(ESSAY_TYPES).forEach(([k, v]) => sel.appendChild(Object.assign(el("option", null, v[0]), { value: k }))); sel.value = ess.type; sel.setAttribute("aria-label", "Aufsatzart");
+  sel.addEventListener("change", () => { ess.type = sel.value; ess.res = null; essSave(); renderEssay(); });
+  const tsel = el("select", "sel"); [["0", "ohne Uhr"], ["45", "45 Min"], ["90", "90 Min"], ["180", "180 Min (Prüfung)"]].forEach(([v, l]) => tsel.appendChild(Object.assign(el("option", null, l), { value: v }))); tsel.value = String(ess.lim / 60000 || 0); tsel.setAttribute("aria-label", "Zeitlimit");
+  const clock = el("b", "bl-time", ess.lim ? "" : ""); clock.id = "ess-clock";
+  tsel.addEventListener("change", () => { clearInterval(ess.iv); ess.lim = Number(tsel.value) * 60000; ess.t0 = Date.now(); if (ess.lim) { ess.iv = setInterval(essTick, 1000); essTick(); } else clock.textContent = ""; });
+  top.append(sel, tsel, clock); box.appendChild(top);
+  const th = el("div", "row"); const ti = el("input", "inp"); ti.id = "ess-thema"; ti.placeholder = lang === "en" ? "Topic / question …" : "Thema / Fragestellung …"; ti.value = ess.thema; ti.style.flex = "1"; ti.setAttribute("aria-label", "Thema");
+  ti.addEventListener("input", () => { ess.thema = ti.value; essSave(); });
+  const rnd = el("button", "btn sm ghost", "🎲"); rnd.type = "button"; rnd.title = "Zufallsthema"; rnd.addEventListener("click", () => { ess.thema = pick(T[2]); ti.value = ess.thema; essSave(); orb.kick(.3); });
+  const ai = el("button", "btn sm violet", "✦ Thema"); ai.type = "button"; ai.title = "Jarvis erfindet ein klausurtypisches Thema"; ai.disabled = !sampleNS;
+  ai.addEventListener("click", async () => { ai.disabled = true; ai.textContent = "…"; try { const r = await sampleNS.json("Erfinde EIN realistisches Klausurthema für: " + T[0] + ", Berliner Fachoberschule Klasse 11, Fachrichtung Gesundheit & Soziales, aktuell und lebensnah. " + (lang === "en" ? "Write the topic in English as a question." : "Formuliere es als Frage oder These auf Deutsch.") + " Antworte NUR mit JSON: {\"thema\": \"...\"}", { modelTier: "quick" }); if (r && r.thema) { ess.thema = String(r.thema); ti.value = ess.thema; essSave(); } } catch { toast("WERKSTATT", "Thema konnte nicht erzeugt werden."); } ai.disabled = false; ai.textContent = "✦ Thema"; });
+  th.append(ti, rnd, ai); box.appendChild(th);
+  const ta = el("textarea", "inp ess-text"); ta.id = "ess-text"; ta.rows = 14; ta.spellcheck = true; ta.lang = lang === "en" ? "en" : "de"; ta.value = (S.essDraft && S.essDraft.text) || ""; ta.placeholder = lang === "en" ? "Write your comment here … (blank line = new paragraph)" : "Schreiben Sie hier … (Leerzeile = neuer Absatz)"; ta.setAttribute("aria-label", "Aufsatz");
+  const stats = el("div", "ess-stats"); stats.id = "ess-stats"; const tips = el("ul", "ess-tips"); tips.id = "ess-tips";
+  let deb = 0; ta.addEventListener("input", () => { clearTimeout(deb); deb = setTimeout(() => { essSave(); essLive(); }, 250); });
+  box.append(ta, stats, tips);
+  const act = el("div", "row");
+  const sk = el("button", "btn sm ghost", "⌗ Gerüst"); sk.type = "button"; sk.title = "Gliederungsgerüst einfügen";
+  sk.addEventListener("click", () => { if (ta.value.trim() && !confirmInline(sk, "Gerüst ans Ende anhängen?")) return; ta.value += (ta.value.trim() ? "\n\n" : "") + (lang === "en" ? "[Introduction: hook + topic + thesis]\n\n[Argument 1: claim – reason – example]\n\n[Argument 2: claim – reason – example]\n\n[Counter-argument + rebuttal]\n\n[Conclusion: sum up + clear opinion]" : ess.type === "lin" ? "[Einleitung: Anlass + Thema + Leitfrage]\n\n[Argument 1 (schwächstes): Behauptung – Begründung – Beispiel]\n\n[Argument 2: Behauptung – Begründung – Beispiel]\n\n[Argument 3 (stärkstes): Behauptung – Begründung – Beispiel]\n\n[Schluss: Fazit + Ausblick]" : "[Einleitung: Anlass + Thema + Leitfrage]\n\n[Pro 1: Behauptung – Begründung – Beispiel]\n\n[Pro 2: Behauptung – Begründung – Beispiel]\n\n[Überleitung]\n\n[Contra 1: Behauptung – Begründung – Beispiel]\n\n[Contra 2: Behauptung – Begründung – Beispiel]\n\n[Schluss: Abwägung + eigene begründete Position]"); essSave(); essLive(); ta.focus(); });
+  const go = el("button", "btn amber", ess.busy ? "Jarvis korrigiert …" : "✦ Korrigieren · Notenpunkte"); go.type = "button"; go.disabled = ess.busy;
+  go.addEventListener("click", essGrade);
+  const cp = el("button", "btn sm ghost", "⧉ Kopieren"); cp.type = "button"; cp.addEventListener("click", async () => { try { await navigator.clipboard.writeText(ta.value); toast("WERKSTATT", "Text kopiert."); } catch { toast("WERKSTATT", "Kopieren nicht erlaubt.", "Text markieren und manuell kopieren."); } });
+  act.append(sk, cp, go); box.appendChild(act);
+  if (ess.res) box.appendChild(essResult(ess.res, ta.value));
+  if (S.essays.length) { const h = el("div", "bl-hist"); h.appendChild(el("small", null, "VERLAUF")); S.essays.slice(-5).reverse().forEach(e => { const d = el("div"); d.append(el("span", null, fmtD(e.d) + " · " + (ESSAY_TYPES[e.type] || [e.type])[0] + " · " + e.w + " Wörter"), el("b", null, e.p + " P")); h.appendChild(d); }); box.appendChild(h); }
+  essLive();
+}
+function confirmInline(btn, q) { if (btn.dataset.armed === "1") { btn.dataset.armed = ""; return true; } btn.dataset.armed = "1"; const o = btn.textContent; btn.textContent = q; setTimeout(() => { btn.dataset.armed = ""; btn.textContent = o; }, 2500); return false; }
+function essTick() { const c = $("ess-clock"); if (!c || !ess.lim) return; const left = Math.max(0, ess.lim - (Date.now() - ess.t0)), m = Math.floor(left / 60000), s = Math.floor(left / 1000) % 60; c.textContent = pad(m) + ":" + pad(s); c.classList.toggle("warn", left < 5 * 60000); if (!left) { clearInterval(ess.iv); ess.lim = 0; toast("ZEIT UM", "Stift weg, Sir.", "Jetzt korrigieren lassen."); sfx.ok && sfx.ok(); } }
+function essLive() {
+  const ta = $("ess-text"); if (!ta) return; const a = essAnalyse(ta.value, ESSAY_TYPES[ess.type][1]), st = $("ess-stats"); st.innerHTML = "";
+  [["Wörter", a.w], ["Sätze", a.s], ["Absätze", a.p], ["Ø Satz", a.avgS ? a.avgS.toFixed(0) : "–"], ["Konnektoren", a.konn.length]].forEach(([k, v]) => { const d = el("div"); d.append(el("b", null, String(v)), el("span", null, k)); st.appendChild(d); });
+  const ul = $("ess-tips"); ul.innerHTML = ""; a.tips.forEach(t => ul.appendChild(el("li", null, t)));
+}
+async function essGrade() {
+  const txt = ($("ess-text").value || "").trim(), T = ESSAY_TYPES[ess.type], lang = T[1];
+  if (txt.split(/\s+/).length < 60) { toast("WERKSTATT", "Zu kurz zum Bewerten.", "Mindestens 60 Wörter, Sir. Lieber 300+."); return; }
+  if (!sampleNS) { toast("WERKSTATT", "KI-Korrektur braucht die Claude-Verbindung."); return; }
+  ess.busy = true; ess.res = null; renderEssay(); orb.set("think", "KORRIGIERT …"); sfx.send && sfx.send();
+  try {
+    const r = await sampleNS.json("Du bist eine strenge, faire Deutsch- bzw. Englischlehrkraft an einer Berliner Fachoberschule (Klasse 11, Fachrichtung Gesundheit & Soziales). Bewerte den folgenden Schülertext der Aufgabenart „" + T[0] + "“" + (ess.thema ? " zum Thema „" + ess.thema + "“" : "") + " nach Klausurmaßstab in Notenpunkten (0–15, 15 = 1+, 5 = 4, unter 5 = nicht ausreichend). Kriterien: Aufgabenerfüllung/Inhalt (Argumentqualität: Behauptung–Begründung–Beispiel, Abwägung, eigenes begründetes Urteil), Aufbau (Einleitung–Hauptteil–Schluss, Überleitungen, Gewichtung), Sprache (" + (lang === "en" ? "grammar, vocabulary, linking words, register" : "Rechtschreibung, Grammatik, Zeichensetzung, Ausdruck, Fachsprache") + "). Sei ehrlich – eine 3 nicht als 1 verkaufen. Zitiere Fehlerstellen WÖRTLICH (kurz, max. 8 Wörter) aus dem Text. Antworte NUR mit JSON: {\"punkte\": Zahl 0-15, \"inhalt\": 0-15, \"aufbau\": 0-15, \"sprache\": 0-15, \"staerken\": [\"…\"], \"schwaechen\": [\"…\"], \"fehler\": [{\"zitat\": \"wörtliches Zitat\", \"typ\": \"R|Gr|Z|A|Inhalt|Struktur\", \"korrektur\": \"…\"}], \"verbessert\": {\"original\": \"ein schwacher Satz wörtlich\", \"neu\": \"bessere Version\"}, \"naechster_schritt\": \"ein konkreter Auftrag\", \"fazit\": \"1–2 Sätze, Jarvis-Stil, sarkastisch aber motivierend, siezt ihn als Sir\"}\n\nTEXT:\n<<<\n" + txt.slice(0, 12000) + "\n>>>", { modelTier: "default" });
+    const n = v => Math.max(0, Math.min(15, Math.round(Number(v) || 0))), arr = v => Array.isArray(v) ? v.map(String).slice(0, 6) : [];
+    ess.res = { p: n(r && r.punkte), i: n(r && r.inhalt), a: n(r && r.aufbau), s: n(r && r.sprache), plus: arr(r && r.staerken), minus: arr(r && r.schwaechen), err: (Array.isArray(r && r.fehler) ? r.fehler : []).filter(f => f && f.zitat).slice(0, 14).map(f => ({ z: String(f.zitat), t: String(f.typ || ""), k: String(f.korrektur || "") })), better: r && r.verbessert && r.verbessert.neu ? { o: String(r.verbessert.original || ""), n: String(r.verbessert.neu) } : null, next: String((r && r.naechster_schritt) || ""), fazit: String((r && r.fazit) || "") };
+    const w = txt.split(/\s+/).length; S.essays.push({ d: isoOf(new Date()), type: ess.type, thema: ess.thema, w, p: ess.res.p }); S.essays = S.essays.slice(-30); save();
+    addXP(20 + ess.res.p); act(4); bump("blurt"); unlock("essay"); if (ess.res.p >= 13) unlock("essay13"); speakOut(ess.res.fazit);
+  } catch (e) { toast("WERKSTATT", e && e.code === "rate_limited" ? "Zu viele Anfragen – gleich nochmal." : "Korrektur fehlgeschlagen."); }
+  finally { ess.busy = false; orb.set("idle"); renderEssay(); }
+}
+function essResult(r, txt) {
+  const w = el("div", "ess-res");
+  const head = el("div", "bl-res"); const big = el("div", "ess-big"); big.append(el("b", null, String(r.p)), el("span", null, "PUNKTE · " + NP2N[r.p])); head.appendChild(big);
+  const bars = el("div", "ess-bars"); [["Inhalt", r.i], ["Aufbau", r.a], ["Sprache", r.s]].forEach(([k, v]) => { const row = el("div", "ess-bar"); const bar = el("i"); bar.style.width = (v / 15 * 100) + "%"; row.append(el("span", null, k), el("div", null), el("b", null, String(v))); row.children[1].appendChild(bar); bars.appendChild(row); });
+  if (r.fazit) bars.appendChild(el("p", "ess-fazit", r.fazit)); head.appendChild(bars); w.appendChild(head);
+  const list = (h, a, cls) => { if (!a.length) return; w.appendChild(el("h4", "bl-h", h)); const ul = el("ul", "ess-list " + cls); a.forEach(x => ul.appendChild(el("li", null, x))); w.appendChild(ul); };
+  list("STÄRKEN", r.plus, "ok"); list("BAUSTELLEN", r.minus, "bad");
+  if (r.err.length) {
+    w.appendChild(el("h4", "bl-h", "MARKIERTER TEXT · " + r.err.length + " STELLEN"));
+    const mk = el("div", "ess-marked"); let rest = txt; const hits = [];
+    r.err.forEach((f, i) => { const at = txt.indexOf(f.z); if (at >= 0 && !hits.some(h => at < h.e && at + f.z.length > h.s)) hits.push({ s: at, e: at + f.z.length, f, i }); });
+    hits.sort((a, b) => a.s - b.s); let pos = 0;
+    hits.forEach(h => { mk.appendChild(document.createTextNode(txt.slice(pos, h.s))); const m = el("mark", null, txt.slice(h.s, h.e)); m.title = h.f.t + ": " + h.f.k; m.dataset.t = h.f.t; mk.appendChild(m); pos = h.e; });
+    mk.appendChild(document.createTextNode(txt.slice(pos))); w.appendChild(mk);
+    const ul = el("ul", "ess-list err"); r.err.forEach(f => { const li = el("li"); li.append(el("b", null, f.t), document.createTextNode(" „" + f.z + "“ → " + f.k)); ul.appendChild(li); }); w.appendChild(ul);
+  }
+  if (r.better) { w.appendChild(el("h4", "bl-h", "SO GEHT ES BESSER")); const b = el("div", "ess-better"); b.append(el("s", null, r.better.o), el("p", null, r.better.n)); w.appendChild(b); }
+  if (r.next) { const n = el("p", "ess-next"); n.append(el("b", null, "Nächster Schritt: "), document.createTextNode(r.next)); w.appendChild(n); }
+  return w;
+}
+
+/* ---- Stilmittel / Operatoren / Lücken-Drill ---- */
+let drill = { mode: "stil", q: null, done: false, streak: 0 };
+function drillNext() {
+  drill.done = false;
+  if (drill.mode === "stil") { const it = pick(STILMITTEL); drill.q = { kind: "stil", it, prompt: it[1], ask: "Welches Stilmittel?", right: it[0], opts: shuffle([it[0]].concat(sample3(STILMITTEL.map(s => s[0]), it[0]))), info: it[0] + ": " + it[2] }; }
+  else if (drill.mode === "op") { const it = pick(OPERATOREN); if (Math.random() < .5) drill.q = { kind: "op", it, prompt: "Operator „" + it[0] + "“", ask: "Welcher Anforderungsbereich?", right: ["AFB I · Reproduktion", "AFB II · Transfer", "AFB III · Urteil/Reflexion"][it[1] - 1], opts: ["AFB I · Reproduktion", "AFB II · Transfer", "AFB III · Urteil/Reflexion"], info: it[0] + " (AFB " + ["I", "II", "III"][it[1] - 1] + "): " + it[2] };
+    else drill.q = { kind: "op", it, prompt: "Operator „" + it[0] + "“", ask: "Was wird verlangt?", right: it[2], opts: shuffle([it[2]].concat(sample3(OPERATOREN.map(o => o[2]), it[2]))), info: it[0] + " = " + it[2] + " (AFB " + ["I", "II", "III"][it[1] - 1] + ")" }; }
+  else { const it = pick(GAPS); drill.q = { kind: "gap", it, prompt: it[0], ask: "Which linking word fits?", right: it[1], opts: shuffle([it[1]].concat(it[2])), info: "„" + it[1] + "“ – " + (Object.entries(PHRASEN).find(([, v]) => v.some(p => p.toLowerCase().startsWith(it[1].toLowerCase()))) || ["EN"])[0].replace("EN · ", "") };
+  }
+  renderDrill();
+}
+function renderDrill() {
+  const box = $("drill"); if (!box) return; box.innerHTML = ""; if (!drill.q) { drillNext(); return; }
+  const seg = el("div", "seg"); seg.setAttribute("role", "group"); [["stil", "Stilmittel"], ["op", "Operatoren"], ["gap", "Linking words"]].forEach(([k, l]) => { const b = el("button", null, l); b.type = "button"; b.setAttribute("aria-pressed", drill.mode === k ? "true" : "false"); b.addEventListener("click", () => { drill.mode = k; drill.streak = 0; drillNext(); }); seg.appendChild(b); });
+  const st = S.wst[drill.mode === "stil" ? "stil" : drill.mode === "op" ? "op" : "gap"], top = el("div", "sim-top"); top.append(seg, el("span", null, "Serie " + drill.streak + " · " + st.r + "/" + st.n + " richtig")); box.appendChild(top);
+  const q = drill.q, card = el("div", "drill-q"); card.append(el("small", null, q.ask), el("p", null, q.prompt)); box.appendChild(card);
+  const grid = el("div", "answers"); q.opts.forEach(o => { const b = el("button", "ans", o); b.type = "button"; if (drill.done) { b.disabled = true; if (o === q.right) b.classList.add("right"); else if (o === drill.pickd) b.classList.add("wrong"); }
+    b.addEventListener("click", e => { if (drill.done) return; drill.done = true; drill.pickd = o; const ok = o === q.right; st.n++; if (ok) { st.r++; drill.streak++; if (drill.mode === "stil") st.best = Math.max(st.best || 0, drill.streak); addXP(3, e.clientX, e.clientY); sfx.ok && sfx.ok(); burst(e.clientX, e.clientY, 14); if (drill.streak === 10) unlock("drill10"); }
+      else { drill.streak = 0; sfx.bad && sfx.bad(); const k = "Werkstatt|" + q.prompt; S.err[k] = { t: q.kind === "gap" ? "Englisch" : "Deutsch", q: q.ask + " " + q.prompt, a: q.right, e: q.info, n: ((S.err[k] && S.err[k].n) || 0) + 1, fixed: 0 }; }
+      bump("quiz"); act(1); save(); renderDrill(); });
+    grid.appendChild(b); }); box.appendChild(grid);
+  if (drill.done) { const ex = el("p", "drill-info", (drill.pickd === q.right ? "✓ " : "✗ ") + q.info); box.appendChild(ex); const nx = el("button", "btn sm", "Weiter →"); nx.type = "button"; nx.addEventListener("click", drillNext); box.appendChild(nx); setTimeout(() => nx.focus({ preventScroll: true }), 30); }
+}
+
+/* ---- Phrasen-Tresor ---- */
+let phCat = Object.keys(PHRASEN)[0];
+function renderPhrasen() {
+  const box = $("phrasen"); if (!box) return; box.innerHTML = "";
+  const chips = el("div", "presets"); Object.keys(PHRASEN).forEach(k => { const b = el("button", "chip-btn" + (k === phCat ? " on" : ""), k); b.type = "button"; b.addEventListener("click", () => { phCat = k; renderPhrasen(); }); chips.appendChild(b); }); box.appendChild(chips);
+  const ul = el("ul", "ph-list"); PHRASEN[phCat].forEach(p => { const li = el("li"); const t = el("span", null, p), c = el("button", "tbtn", "⧉"), s = el("button", "tbtn", "🔊"); c.type = s.type = "button"; c.title = "Kopieren"; s.title = "Vorlesen";
+    c.addEventListener("click", async () => { try { await navigator.clipboard.writeText(p.replace(/\s*…\s*/g, " ").trim()); toast("TRESOR", "Kopiert", p); } catch { toast("TRESOR", "Kopieren nicht erlaubt."); } });
+    s.addEventListener("click", () => { TTS.stop(); TTS.unlock(); TTS.enqueue(p.replace(/…/g, ""), { lang: phCat.startsWith("EN") ? "en" : "de" }); });
+    li.append(t, s, c); ul.appendChild(li); }); box.appendChild(ul);
+  const ins = el("button", "btn sm ghost", "↳ In Aufsatz einfügen"); ins.type = "button"; ins.title = "Erste Phrase der Kategorie an der Cursorposition einfügen";
+  ins.addEventListener("click", () => { const ta = $("ess-text"); if (!ta) return; const p = PHRASEN[phCat][0], a = ta.selectionStart || ta.value.length; ta.value = ta.value.slice(0, a) + p + " " + ta.value.slice(a); essSave(); essLive(); ta.focus(); });
+  box.appendChild(ins);
+}
+
+/* ---- 7-Tage-Lernplan ---- */
+function planBuild() {
+  const out = [], ex = allExams().filter(e => dDays(e.date) >= 0).sort((a, b) => a.date.localeCompare(b.date));
+  for (let d = 0; d < 7; d++) {
+    const day = new Date(today0()); day.setDate(day.getDate() + d); const iso = isoOf(day), wdN = day.getDay(), fer = FERIEN.find(([, a, b]) => iso >= a && iso <= b);
+    const slots = fer ? [["10:00", "10:30", "Ferien-Wiederholung"]] : (WEEK[wdN] ? WEEK[wdN].items.filter(i => /Lernblock|vorbereiten|Karten|Nachbereitung|Check/i.test(i[2])) : []);
+    const up = ex.filter(e => e.date >= iso), near = up.filter(e => (new Date(e.date) - day) / 864e5 <= 7);
+    const blocks = slots.map(([a, b, lbl], si) => {
+      const hm = t => { const [h, m] = String(t || "0:0").split(":").map(Number); return h * 60 + m; }, examToday = near[0] && near[0].date === iso, after = examToday && si > 0 && hm(a) >= 13 * 60;
+      const cand = after ? near.slice(1) : near, e = cand[0], e2 = cand[1]; let task, tool = null;
+      if (examToday && si > 0 && !after) { task = "Letzter Check " + near[0].fach + ": nur Karten, ruhig bleiben – nichts Neues."; tool = "training"; }
+      else if (!e && examToday) task = "Nach der Klausur: " + lbl + " – oder bewusst Pause machen.";
+      else if (!e) { const f = SUBJECTS[(d + si) % SUBJECTS.length]; task = "Spaced Repetition: Karten + Fehlerheft " + f; tool = "training"; }
+      else { const dd = Math.round((new Date(e.date + "T00:00:00") - day) / 864e5), dbl = e2 && Math.round((new Date(e2.date) - new Date(e.date)) / 864e5) <= 2;
+        const f = dbl && si % 2 === 1 ? e2.fach : e.fach, ddf = dbl && si % 2 === 1 ? Math.round((new Date(e2.date + "T00:00:00") - day) / 864e5) : dd;
+        const mins = t => { const [h, m] = String(t || "0:0").split(":").map(Number); return h * 60 + m; }, short = b && mins(b) - mins(a) < 30;
+        if (ddf <= 0) task = "Klausurtag " + f + ": normal frühstücken, 10 Min Karten – sonst nichts Neues.";
+        else if (short) { task = "Karteikarten + Fehlerheft: " + f; tool = "training"; }
+        else if (ddf === 1) { task = "Vorabend " + f + ": nur Karten + Fehlerheft, früh schlafen."; tool = "training"; }
+        else if (ddf <= 4) { task = (f === "Deutsch" || f === "Englisch" ? "Aufsatz im Klausurformat mit Uhr (" + f + ") – Werkstatt" : "Aufgaben im Klausurformat mit Uhr: " + f + " – Klausur-Simulator"); tool = f === "Deutsch" || f === "Englisch" ? "werkstatt" : "labor"; }
+        else { task = "Themenliste " + f + " klären + Blurting, Lücken rot markieren"; tool = "labor"; }
+        if (dbl && si === 0 && slots.length === 1) task += " · Doppelschlag: zweite Hälfte " + e2.fach;
+      }
+      return { id: iso + "|" + si, a, b, lbl, task, tool };
+    });
+    out.push({ iso, day, fer, blocks, head: fer ? fer[0] : (WEEK[wdN] || { head: "" }).head });
+  }
+  return out;
+}
+function renderPlan() {
+  const box = $("plan"); if (!box) return; box.innerHTML = ""; const P = planBuild(); let tot = 0, done = 0;
+  P.forEach(d => {
+    const row = el("div", "plan-day" + (d.iso === isoOf(new Date()) ? " today" : "")); const h = el("div", "plan-h"); h.append(el("b", null, d.day.toLocaleDateString("de-DE", { weekday: "short", day: "2-digit", month: "2-digit" })), el("span", null, d.head)); row.appendChild(h);
+    if (!d.blocks.length) row.appendChild(el("div", "note", "Kein Lernslot im Plan – Pause ist auch Training."));
+    d.blocks.forEach(b => { tot++; const isDone = !!S.planDone[b.id]; if (isDone) done++; const it = el("label", "plan-it" + (isDone ? " done" : "")); const cb = el("input"); cb.type = "checkbox"; cb.checked = isDone;
+      cb.addEventListener("change", e => { if (cb.checked) { S.planDone[b.id] = 1; addXP(10); act(2); unlock("plan"); sfx.ok && sfx.ok(); } else delete S.planDone[b.id]; save(); renderPlan(); });
+      const tx = el("div"); tx.append(el("small", null, b.a + (b.b ? "–" + b.b : "") + " · " + b.lbl), el("span", null, b.task)); it.append(cb, tx);
+      if (b.tool) { const go = el("button", "tbtn", "→"); go.type = "button"; go.title = "Werkzeug öffnen"; go.addEventListener("click", e => { e.preventDefault(); show(b.tool); }); it.appendChild(go); }
+      row.appendChild(it); });
+    box.appendChild(row);
+  });
+  const hd = $("plan-count"); if (hd) hd.textContent = done + "/" + tot + " erledigt";
+}
+function werkstattShow() { renderPlan(); renderEssay(); renderDrill(); renderPhrasen(); }
+
 function renderAll() { applyTheme(); applyPerf(); renderMissions(); renderMem(); renderKB(); renderStats(); renderXP(); renderAch(); refreshExamViews(); tRender(); renderBrief(); syncToggles(); renderHeat(); renderNoten(); syncOpts(); renderCard(); $("g-target").value = S.gtarget; $("g-pf4").value = S.pf4 || ""; }
 addEventListener("resize", () => { sizeCanvases(); moveInd(); });
 if (innerWidth < 520) $("prompt").placeholder = "Jarvis fragen … / = Befehle";
